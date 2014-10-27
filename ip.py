@@ -3,7 +3,6 @@
 import os
 import sys
 import ipcalc
-import time
 
 # add customized library path
 root = os.path.abspath(os.path.dirname(__file__))
@@ -13,6 +12,7 @@ import ezshell
 
 # Used shell commands:
 #   echo, grep, awk, sed, sort, ip, iw
+# https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
 
 # Used python modules:
 # setuptools
@@ -73,7 +73,10 @@ def ifaddresses(iface):
     #    "ip addr show %s | grep inet | grep -v inet6 | awk '{print $2}'"
     ret = ezshell.run(
         "ip addr show %s | grep inet | awk '{print $2}'"
-        % iface)
+        % iface, 0)
+    if ret.returncode() != 0:
+        raise ValueError("Device \"%s\" does not exist." % iface)
+
     info["inet"] = list()
     for ip in ret.output().split():
         net = ipcalc.Network(ip)
@@ -98,7 +101,10 @@ def ifupdown(iface, up):
             for dhclient in dhclients:
                 ezshell.run("kill %s" % dhclient)
         cmd = "ip link set %s %s" % (iface, "up" if up else "down")
-        ret = ezshell.run(cmd)
+        ret = ezshell.run(cmd, 0)
+        if ret.returncode() != 0:
+            raise ValueError("Cannot update the link status for \"%s\"."
+                             % iface)
     except Exception, e:
         print "Cannot update the link status: %s" % e
         raise e
@@ -106,6 +112,11 @@ def ifupdown(iface, up):
 
 def ifconfig(iface, dhcpc, ip="", netmask="24", gateway=""):
     # TODO(aeluin) catch the exception?
+    # Check if interface exist
+    ret = ezshell.run("ip a show %s" % iface, 0)
+    if ret.returncode() != 0:
+        raise ValueError("Device \"%s\" does not exist." % iface)
+
     # Disable the dhcp client and flush interface
     dhclients = ezshell.run(
         "ps aux | grep 'dhclient %s' | grep -v grep" % iface)
@@ -130,10 +141,11 @@ def ifconfig(iface, dhcpc, ip="", netmask="24", gateway=""):
 if __name__ == "__main__":
     print interfaces()
 
-    #ifconfig("eth0", True)
-    #time.sleep(10)
+    # ifconfig("eth0", True)
+    # time.sleep(10)
     # ifconfig("eth1", False, "192.168.31.36")
     eth0 = ifaddresses("eth0")
+    print eth0
     print "link: %d" % eth0["link"]
     for ip in eth0["inet"]:
         print "ip: %s" % ip["ip"]
