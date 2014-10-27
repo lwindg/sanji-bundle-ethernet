@@ -5,8 +5,6 @@ import sys
 import ipcalc
 
 # add customized library path
-root = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(root + "/../ezshell")
 import ezshell
 
 
