@@ -1,0 +1,22 @@
+{
+  "name": "ethernet",
+  "version": "1.0",
+  "author": "Aeluin Chen",
+  "email": "aeluin.chen@moxa.com",
+  "description": "Handle the Ethernet interfaces",
+  "license": "MOXA",
+  "main": "ethernet.py",
+  "argument": "",
+  "priority": 20,
+  "hook": [],
+  "dependencies": {},
+  "repository": "",
+  "role": "model",
+  "ttl": 10,
+  "resources": [
+    {
+      "methods": ["get", "put"],
+      "resource": "/network/ethernet"
+    }
+  ]
+}
