@@ -325,7 +325,9 @@ class Ethernet(Sanji):
         "dns": list,
         Extra: object
     }, required=True)
-    @Route(methods="put", resource="/network/ethernet/:id/dhcp", schema=put_dhcp_schema)
+
+    @Route(methods="put", resource="/network/ethernet/:id/dhcp",
+           schema=put_dhcp_schema)
     def put_dhcp_info(self, message, response):
         """
         /network/ethernet/1/dhcp
