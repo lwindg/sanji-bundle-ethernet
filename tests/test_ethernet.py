@@ -167,23 +167,23 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifaddresses")
     def test_get(self, mock_ifaddresses):
         """
-        capability: /network/ethernet
-        collection: /network/ethernet?collection=true
+        collection: /network/ethernets
         """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
         message = Message({"data": {}, "query": {}, "param": {}})
 
+        '''remove capability function
         # case 1: capability
         def resp1(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(data, [1, 2])
         self.ethernet.get(message=message, response=resp1, test=True)
+        '''
 
         # case 2: collection
         def resp2(code=200, data=None):
             self.assertEqual(200, code)
-            self.assertEqual(2, len(data["collection"]))
-        message.query["collection"] = "true"
+            self.assertEqual(2, len(data))
         self.ethernet.get(message=message, response=resp2, test=True)
 
         # case 3: id
@@ -192,14 +192,13 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(2, data["id"])
             self.assertEqual(0, data["currentStatus"])
             self.assertEqual("78:ac:c0:c1:a8:ff", data["mac"])
-        message.query.pop("collection")
-        message.param["id"] = 2
+        message.query["id"] = 2
         self.ethernet.get(message=message, response=resp3, test=True)
 
     @patch("ethernet.ip.ifaddresses")
     def test_get_by_id(self, mock_ifaddresses):
         """
-        /network/ethernet/1
+        /network/ethernets/1
         """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
         message = Message({"data": {}, "query": {}, "param": {}})
@@ -224,7 +223,7 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifconfig")
     def test_put(self, mock_ifconfig, mock_ifupdown):
         """
-        bulk put: /network/ethernet
+        bulk put: /network/ethernets
         "data": [
             {
                 "id": 1,
@@ -303,7 +302,7 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifconfig")
     def test_put_by_id(self, mock_ifconfig, mock_ifupdown):
         """
-        /network/ethernet/1
+        /network/ethernets/1
         "data": {
             "id": 1,
             ...
@@ -339,7 +338,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test_put_dhcp_info(self):
         """
-        /network/ethernet/1/dhcp
+        /network/ethernets/1/dhcp
         "data": {
             "ip": "",
             "netmask": "",

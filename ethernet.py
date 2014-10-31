@@ -207,32 +207,35 @@ class Ethernet(Sanji):
             except Exception, e:
                 raise KeyError("Invalid input: %s." % e)
 
-    @Route(methods="get", resource="/network/ethernet")
+    @Route(methods="get", resource="/network/ethernets")
     def get(self, message, response):
         """
-        capability: /network/ethernet
-        collection: /network/ethernet?collection=true
+        collection: /network/ethernets
+        id: /network/ethernets?id=#
         """
-        if "collection" in message.query:
-            collection = []
-            for iface in self.model.db:
-                data = self.read(iface["id"])
-                if data:
-                    collection.append(data)
-            return response(data={"collection": collection})
 
-        if "id" in message.param:
+        # TODO: multiple id supported?
+        if "id" in message.query:
             return self.get_by_id(message=message)
 
+        collection = []
+        for iface in self.model.db:
+            data = self.read(iface["id"])
+            if data:
+                collection.append(data)
+        return response(data=collection)
+
+        '''capability function removed
         capability = []
         for iface in self.model.db:
             capability.append(iface["id"])
         return response(data=capability)
+        '''
 
-    @Route(methods="get", resource="/network/ethernet/:id")
+    @Route(methods="get", resource="/network/ethernets/:id")
     def get_by_id(self, message, response):
         """
-        /network/ethernet/1
+        /network/ethernets/1
         """
         ifinfo = self.read(message.param["id"])
         if ifinfo:
@@ -249,10 +252,10 @@ class Ethernet(Sanji):
         else:
             raise ValueError("No such device.")
 
-    @Route(methods="put", resource="/network/ethernet")
+    @Route(methods="put", resource="/network/ethernets")
     def put(self, message, response):
         """
-        bulk put: /network/ethernet
+        bulk put: /network/ethernets
         "data": [
             {
                 "id": 1,
@@ -290,10 +293,10 @@ class Ethernet(Sanji):
             return response(code=400, data={"message": error})
         return response(data=self.model.db)
 
-    @Route(methods="put", resource="/network/ethernet/:id")
+    @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
         """
-        /network/ethernet/1
+        /network/ethernets/1
         "data": {
             "id": 1,
             ...
@@ -326,11 +329,11 @@ class Ethernet(Sanji):
         Extra: object
     }, required=True)
 
-    @Route(methods="put", resource="/network/ethernet/:id/dhcp",
+    @Route(methods="put", resource="/network/ethernets/:id/dhcp",
            schema=put_dhcp_schema)
     def put_dhcp_info(self, message, response):
         """
-        /network/ethernet/1/dhcp
+        /network/ethernets/1/dhcp
         "data": {
             "ip": "",
             "netmask": "",

@@ -16,7 +16,7 @@
   "resources": [
     {
       "methods": ["get", "put"],
-      "resource": "/network/ethernet"
+      "resource": "/network/ethernets"
     }
   ]
 }
