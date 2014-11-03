@@ -207,6 +207,16 @@ class Ethernet(Sanji):
             except Exception, e:
                 raise KeyError("Invalid input: %s." % e)
 
+    def _get_by_id(self, message, response):
+        """
+        /network/ethernets
+        with id=#
+        """
+        ifinfo = self.read(int(message.param["id"]))
+        if ifinfo:
+            return response(data=ifinfo)
+        return response(code=404, data={"message": "No such device."})
+
     @Route(methods="get", resource="/network/ethernets")
     def get(self, message, response):
         """
@@ -216,7 +226,8 @@ class Ethernet(Sanji):
 
         # TODO: multiple id supported?
         if "id" in message.query:
-            return self.get_by_id(message=message)
+            message.param["id"] = message.query["id"]
+            return self._get_by_id(message=message, response=response)
 
         collection = []
         for iface in self.model.db:
@@ -237,10 +248,7 @@ class Ethernet(Sanji):
         """
         /network/ethernets/1
         """
-        ifinfo = self.read(message.param["id"])
-        if ifinfo:
-            return response(data=ifinfo)
-        return response(code=404, data={"message": "No such device."})
+        return self._get_by_id(message=message, response=response)
 
     def merge_info(self, iface):
         """
@@ -251,6 +259,32 @@ class Ethernet(Sanji):
                 return merge(item, iface)
         else:
             raise ValueError("No such device.")
+
+    def _put_by_id(self, message, response):
+        """
+        /network/ethernets/1
+        "data": {
+            "id": 1,
+            ...
+        }
+        """
+        # TODO: status code should be added into error message
+        # 1. no "data"
+        # 2. data is dict() and no "enable"
+        try:
+            self.schema_validate(message)
+        except Exception, e:
+            return response(code=400,
+                            data={"message": e.message})
+
+        try:
+            info = self.merge_info(message.data)
+            self.apply(info)
+            self.model.save_db()
+            self.model.backup_db()
+            return response(data=info)
+        except Exception, e:
+            return response(code=404, data={"message": e.message})
 
     @Route(methods="put", resource="/network/ethernets")
     def put(self, message, response):
@@ -275,10 +309,10 @@ class Ethernet(Sanji):
             self.schema_validate(message)
         except Exception, e:
             return response(code=400,
-                            data={"message": "Invalid input: %s." % e})
+                            data={"message": e.message})
 
         if "id" in message.param:
-            return self.put_by_id(message)
+            return self._put_by_id(message=message, response=response)
 
         error = None
         for iface in message.data:
@@ -287,7 +321,7 @@ class Ethernet(Sanji):
                 self.apply(info)
                 self.model.save_db()
             except Exception, e:
-                error = "%s" % e
+                error = e.message
         self.model.backup_db()
         if error:
             return response(code=400, data={"message": error})
@@ -302,23 +336,7 @@ class Ethernet(Sanji):
             ...
         }
         """
-        # TODO: status code should be added into error message
-        # 1. no "data"
-        # 2. data is dict() and no "enable"
-        try:
-            self.schema_validate(message)
-        except Exception, e:
-            return response(code=400,
-                            data={"message": "Invalid input: %s." % e})
-
-        try:
-            info = self.merge_info(message.data)
-            self.apply(info)
-            self.model.save_db()
-            self.model.backup_db()
-            return response(data=info)
-        except Exception, e:
-            return response(code=404, data={"message": "%s" % e})
+        return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
         "ip": str,
@@ -352,7 +370,7 @@ class Ethernet(Sanji):
             self.model.save_db()
             return response(data=info)
         except Exception, e:
-            return response(code=404, data={"message": "%s" % e})
+            return response(code=404, data={"message": e.message})
 
 
 if __name__ == "__main__":
