@@ -112,7 +112,15 @@ class View(Sanji):
 
             # case 8: test PUT with enable=1 for eth1
             sleep(2)
-            data = {"id": 2, "enable": 1}
+            data = {"id": 2, "enable": 1,
+                    "enableDhcp": 0,
+                    "enableDefaultGW": 1,
+                    "ip": "192.168.31.37",
+                    "netmask": "255.255.255.0",
+                    "subnet": "192.168.31.0",
+                    "gateway": "192.168.31.254",
+                    "dns": ["192.168.50.42"]}
+            #data = {"id": 2, "enable": 1, "enableDhcp": 1}
             resource = "%s/2" % REQ_RESOURCE
             print "PUT %s" % resource
             res = self.publish.put(resource, data=data)
