@@ -257,7 +257,7 @@ class TestEthernetClass(unittest.TestCase):
 
         def resp2(code=200, data=None):
             self.assertEqual(400, code)
-        message.data.append({"id": 1, "enable": 1, "ip": "192.168.31.36"})
+        message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.36"})
         message.data.append({"id": 3, "enable": 1})
         self.ethernet.put(message, response=resp2, test=True)
         data = self.ethernet.read(1)
@@ -278,8 +278,8 @@ class TestEthernetClass(unittest.TestCase):
         def resp4(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, len(data))
-        message.data.append({"id": 1, "enable": 1, "ip": "192.168.31.37"})
-        message.data.append({"id": 2, "enable": 1, "ip": "192.168.41.37"})
+        message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.37"})
+        message.data.append({"id": 2, "enable": 1, "ip": u"192.168.41.37"})
         self.ethernet.put(message, response=resp4, test=True)
         data = self.ethernet.read(1)
         self.assertEqual("192.168.31.37", data["ip"])
@@ -295,7 +295,7 @@ class TestEthernetClass(unittest.TestCase):
         message.param["id"] = 1
         message.data["id"] = 1
         message.data["enable"] = 1
-        message.data["ip"] = "192.168.31.39"
+        message.data["ip"] = u"192.168.31.39"
         self.ethernet.put(message, response=resp5, test=True)
 
     @patch("ethernet.ip.ifupdown")
@@ -323,7 +323,7 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(404, code)
         message.data["id"] = 3
         message.data["enable"] = 0
-        message.data["ip"] = "192.168.31.37"
+        message.data["ip"] = u"192.168.31.37"
         self.ethernet.put_by_id(message, response=resp2, test=True)
 
         # case 3: put successfully
@@ -331,7 +331,7 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(404, code)
         message.data["id"] = 1
         message.data["enable"] = 0
-        message.data["ip"] = "192.168.31.40"
+        message.data["ip"] = u"192.168.31.40"
         self.ethernet.put_by_id(message, response=resp3, test=True)
         data = self.ethernet.read(1)
         self.assertEqual("192.168.31.40", data["ip"])

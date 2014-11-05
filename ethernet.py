@@ -274,6 +274,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
+            print e
             return response(code=400,
                             data={"message": e.message})
 
@@ -308,6 +309,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
+            print e
             return response(code=400,
                             data={"message": e.message})
 
@@ -339,11 +341,11 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
-        "ip": str,
-        "netmask": str,
-        Optional("subnet"): str,
-        "gateway": str,
-        "dns": list,
+        "ip": unicode,
+        "netmask": unicode,
+        Optional("subnet"): unicode,
+        "gateway": unicode,
+        "dns": [unicode],
         Extra: object
     }, required=True)
 
@@ -360,6 +362,7 @@ class Ethernet(Sanji):
             "gateway": ""
         }
         """
+        # TODO: should be removed when schema worked for unittest
         if not hasattr(message, "data"):
             return response(code=400,
                             data={"message": "Invalid input."})
