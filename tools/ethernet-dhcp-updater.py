@@ -7,7 +7,7 @@ import json
 from random import randint
 
 
-DHCP_RES = "/network/ethernet/:iface/dhcp"
+DHCP_RES = "/network/ethernets/:iface/dhcp"
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(

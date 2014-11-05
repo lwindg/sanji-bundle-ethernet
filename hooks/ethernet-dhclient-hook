@@ -8,12 +8,12 @@ declare -x TERM="xterm"
 
 # include basic sanji functions
 # TODO: change to correct path
-UPDATER=/home/model/network/ethernet/ethernet-dhcp-updater.py
+UPDATER=/home/model/network/ethernets/ethernet-dhcp-updater.py
 
 
 # update data of ethernet model
-#echo "${interface}, ${new_ip_address}, ${new_subnet_mask}, 
-#	${new_domain_name}, ${new_domain_search}, ${new_domain_name_servers}, 
+#echo "${interface}, ${new_ip_address}, ${new_subnet_mask},
+#	${new_domain_name}, ${new_domain_search}, ${new_domain_name_servers},
 #	${new_routers}"
 dns_array=(${new_domain_name_servers})
 firstDns=${dns_array[0]}
