@@ -120,7 +120,7 @@ class View(Sanji):
                     "subnet": "192.168.31.0",
                     "gateway": "192.168.31.254",
                     "dns": ["192.168.50.42"]}
-            #data = {"id": 2, "enable": 1, "enableDhcp": 1}
+            # data = {"id": 2, "enable": 1, "enableDhcp": 1}
             resource = "%s/2" % REQ_RESOURCE
             print "PUT %s" % resource
             res = self.publish.put(resource, data=data)
