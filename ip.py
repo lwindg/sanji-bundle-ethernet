@@ -140,7 +140,7 @@ def ifconfig(iface, dhcpc, ip="", netmask="24", gateway=""):
     else:
         if ip:
             net = ipcalc.Network("%s/%s" % (ip, netmask))
-            sh.ip("addr", "add", "%s/%s" % (ip, net.netmask()), "broadcast", 
+            sh.ip("addr", "add", "%s/%s" % (ip, net.netmask()), "broadcast",
                   net.broadcast(), "dev", iface)
 
 

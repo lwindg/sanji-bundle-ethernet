@@ -221,7 +221,8 @@ class TestEthernetClass(unittest.TestCase):
 
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
-    def test_put(self, mock_ifconfig, mock_ifupdown):
+    @patch("ethernet.ip.ifaddresses")
+    def test_put(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
         """
         bulk put: /network/ethernets
         "data": [
