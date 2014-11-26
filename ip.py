@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import os
+import sh
 import ipcalc
-
-# add customized library path
-import ezshell
-
 
 # Used shell commands:
 #   echo, grep, awk, sed, sort, ip, iw
@@ -18,8 +15,8 @@ import ezshell
 # ipcalc.py
 #   https://github.com/tehmaze/ipcalc/
 #
-# ezshell
-#   customized
+# sh.py
+#   https://pypi.python.org/pypi/sh
 
 
 def interfaces():
@@ -68,14 +65,17 @@ def ifaddresses(iface):
         info["link"] = 0
 
     #    "ip addr show %s | grep inet | grep -v inet6 | awk '{print $2}'"
-    ret = ezshell.run(
-        "ip addr show %s | grep inet | awk '{print $2}'"
-        % iface, 0)
-    if ret.returncode() != 0:
+    try:
+        output = sh.awk(sh.grep(
+            sh.ip("addr", "show", iface), "inet"),
+            "{print $2}")
+    except sh.ErrorReturnCode_1:
         raise ValueError("Device \"%s\" does not exist." % iface)
+    except:
+        raise ValueError("Unknown error for \"%s\"." % iface)
 
     info["inet"] = list()
-    for ip in ret.output().split():
+    for ip in output.split():
         net = ipcalc.Network(ip)
         item = dict()
         item["ip"] = ip.split("/")[0]
@@ -89,50 +89,59 @@ def ifaddresses(iface):
 
 
 def ifupdown(iface, up):
-    try:
-        if not up:
-            ret = ezshell.run(
-                "ps aux | grep %s | grep -v grep | \
-                awk '{print $2}'" % iface)
-            dhclients = ret.output().split()
+    if not up:
+        try:
+            output = sh.awk(
+                sh.grep(sh.grep(sh.ps("ax"), iface), "dhclient"),
+                "{print $1}")
+            dhclients = output().split()
             for dhclient in dhclients:
-                ezshell.run("kill %s" % dhclient)
-        cmd = "ip link set %s %s" % (iface, "up" if up else "down")
-        ret = ezshell.run(cmd, 0)
-        if ret.returncode() != 0:
-            raise ValueError("Cannot update the link status for \"%s\"."
-                             % iface)
-    except Exception, e:
-        print "Cannot update the link status: %s" % e
-        raise e
+                sh.kill(dhclient)
+        except:
+            pass
+    try:
+        sh.ip("link", "set", iface, "up" if up else "down")
+    except:
+        raise ValueError("Cannot update the link status for \"%s\"."
+                         % iface)
 
 
 def ifconfig(iface, dhcpc, ip="", netmask="24", gateway=""):
     # TODO(aeluin) catch the exception?
     # Check if interface exist
-    ret = ezshell.run("ip a show %s" % iface, 0)
-    if ret.returncode() != 0:
+    try:
+        sh.ip("addr", "show", iface)
+    except sh.ErrorReturnCode_1:
         raise ValueError("Device \"%s\" does not exist." % iface)
+    except:
+        raise ValueError("Unknown error for \"%s\"." % iface)
 
     # Disable the dhcp client and flush interface
-    dhclients = ezshell.run(
-        "ps aux | grep 'dhclient %s' | grep -v grep" % iface)
-    dhclients = dhclients.output().split()
-    if 1 == len(dhclients):
-        ezshell.run("dhclient -x %s", 0)
-    elif len(dhclients) > 1:
-        for dhclient in dhclients:
-            ezshell.run("kill %s" % dhclient)
-    ezshell.run("ip -4 addr flush label %s" % iface, 0)
+    try:
+        dhclients = sh.awk(
+            sh.grep(sh.grep(sh.ps("ax"), iface), "dhclient"),
+            "{print $1}")
+        dhclients = dhclients.split()
+        if 1 == len(dhclients):
+            sh.dhclient("-x", iface)
+        elif len(dhclients) > 1:
+            for dhclient in dhclients:
+                sh.kill(dhclient)
+    except:
+        pass
+
+    try:
+        sh.ip("-4", "addr", "flush", "label", iface)
+    except:
+        raise ValueError("Unknown error for \"%s\"." % iface)
 
     if dhcpc:
-        ezshell.run("dhclient %s" % iface)
+        sh.dhclient(iface)
     else:
         if ip:
             net = ipcalc.Network("%s/%s" % (ip, netmask))
-            cmd = "ip a add %s/%s broadcast %s dev %s" % \
-                (ip, net.netmask(), net.broadcast(), iface)
-            ezshell.run(cmd, 0)
+            sh.ip("addr", "add", "%s/%s" % (ip, net.netmask()), "broadcast", 
+                  net.broadcast(), "dev", iface)
 
 
 if __name__ == "__main__":

@@ -2,5 +2,5 @@ flake8
 paho-mqtt
 coveralls
 ipcalc
+sh
 git+https://github.com/Sanji-IO/sanji.git#egg=sanji
-git+https://github.com/lwindg/ezshell.git#egg=ezshell
