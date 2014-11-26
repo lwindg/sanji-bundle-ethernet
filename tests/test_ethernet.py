@@ -103,14 +103,14 @@ class TestEthernetClass(unittest.TestCase):
 
         os.remove("%s/data/ethernet.json" % dirpath)
 
-        # case 3: load backup configuration
+        # case 2: load backup configuration
         self.ethernet.load(dirpath, ifaces)
         self.assertEqual(2, len(self.ethernet.model.db))
 
         os.remove("%s/data/ethernet.json" % dirpath)
         os.remove("%s/data/ethernet.backup.json" % dirpath)
 
-        # case 4: cannot load any configuration
+        # case 3: cannot load any configuration
         with self.assertRaises(IOError):
             self.ethernet.load("%s/mock" % dirpath, ifaces)
 

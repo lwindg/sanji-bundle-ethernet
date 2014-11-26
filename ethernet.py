@@ -12,7 +12,7 @@ from voluptuous import Schema
 from voluptuous import Optional, Extra
 # from voluptuous import Required
 # from voluptuous import All
-from voluptuous import In, Range
+from voluptuous import In, Range, Any
 # from voluptuous import Length, In, Range
 import ip
 
@@ -181,11 +181,11 @@ class Ethernet(Sanji):
             Optional("type"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
             Optional("enableDefaultGW"): In(frozenset([0, 1])),
-            Optional("ip"): unicode,
-            Optional("netmask"): unicode,
-            Optional("subnet"): unicode,
-            Optional("gateway"): unicode,
-            Optional("dns"): [unicode],
+            Optional("ip"): Any(str, unicode),
+            Optional("netmask"): Any(str, unicode),
+            Optional("subnet"): Any(str, unicode),
+            Optional("gateway"): Any(str, unicode),
+            Optional("dns"): [Any(str, unicode)],
             Extra: object
         }, required=True)
 
@@ -341,11 +341,11 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
-        "ip": unicode,
-        "netmask": unicode,
-        Optional("subnet"): unicode,
-        "gateway": unicode,
-        "dns": [unicode],
+        "ip": Any(str, unicode),
+        "netmask": Any(str, unicode),
+        Optional("subnet"): Any(str, unicode),
+        "gateway": Any(str, unicode),
+        "dns": [Any(str, unicode)],
         Extra: object
     }, required=True)
 
