@@ -17,6 +17,14 @@
     {
       "methods": ["get", "put"],
       "resource": "/network/ethernets"
+    },
+    {
+      "methods": ["get", "put"],
+      "resource": "/network/ethernets/:id"
+    },
+    {
+      "methods": ["put"],
+      "resource": "/network/ethernets/:id/dhcp"
     }
   ]
 }
