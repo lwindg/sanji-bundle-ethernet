@@ -84,11 +84,13 @@ class TestEthernetClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bundle.init()
 
-    def test__init__no_conf(self):
+    @patch("ethernet.ip.interfaces")
+    def test__init__no_conf(self, mock_interfaces):
         """
         init: no configuration file
         """
-        # case: no configuration file
+        mock_interfaces.return_value = ["eth0"]
+
         with self.assertRaises(IOError):
             with patch("ethernet.ModelInitiator") as mock_modelinit:
                 mock_modelinit.side_effect = IOError
