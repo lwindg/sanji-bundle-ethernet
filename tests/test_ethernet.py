@@ -283,9 +283,10 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put__no_data(self, mock_ifaddresses, mock_ifconfig,
+                           mock_ifupdown):
         """
-        put (/network/ethernets)
+        put (/network/ethernets): no data attribute
         "data": [
             {
                 "id": 1,
@@ -307,7 +308,8 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put__invalid_json(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put__invalid_json(self, mock_ifaddresses, mock_ifconfig,
+                                mock_ifupdown):
         """
         put (/network/ethernets): invalid json schema
         "data": [
@@ -337,7 +339,8 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put__partial_success(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put__partial_success(self, mock_ifaddresses, mock_ifconfig,
+                                   mock_ifupdown):
         """
         put (/network/ethernets): one interface is not exist
         "data": [
@@ -365,7 +368,8 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put__unknown_ifaces(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put__unknown_ifaces(self, mock_ifaddresses, mock_ifconfig,
+                                  mock_ifupdown):
         """
         put (/network/ethernets): all interfaces are not exist
         "data": [
@@ -450,7 +454,8 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put_by_id__invalid_json(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put_by_id__invalid_json(self, mock_ifaddresses, mock_ifconfig,
+                                      mock_ifupdown):
         """
         put_by_id (/network/ethernets/1): invalid json schema
         "data": {
@@ -468,7 +473,8 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put_by_id__unknown_iface(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put_by_id__unknown_iface(self, mock_ifaddresses, mock_ifconfig,
+                                       mock_ifupdown):
         """
         put_by_id (/network/ethernets/3): unknown interface
         "data": {
