@@ -553,7 +553,8 @@ class TestEthernetClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bundle.put_dhcp_info(message, test=True)
 
-    def test__put_dhcp_info(self):
+    @patch("ethernet.ip.ifaddresses")
+    def test__put_dhcp_info(self, mock_ifaddresses):
         """
         put_dhcp_info (/network/ethernets/1/dhcp)
         "data": {
@@ -566,14 +567,14 @@ class TestEthernetClass(unittest.TestCase):
         }
         """
         message = Message({"data": {}, "query": {}, "param": {}})
-        message.param["id"] = 1
+        message.param["id"] = 2
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
         self.bundle.put_dhcp_info(message, test=True)
 
-        data = self.bundle.read(1)
+        data = self.bundle.read(2)
         self.assertEqual("192.168.41.3", data["ip"])
         self.assertEqual("255.255.255.0", data["netmask"])
         self.assertEqual("192.168.41.254", data["gateway"])
