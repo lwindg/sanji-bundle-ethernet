@@ -519,6 +519,7 @@ class TestEthernetClass(unittest.TestCase):
         """
         put_dhcp_info (/network/ethernets/1/dhcp): invalid json schema
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -528,14 +529,14 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"query": {}, "param": {}})
 
-        def resp(code=200, data=None):
-            self.assertEqual(400, code)
-        self.bundle.put_dhcp_info(message, response=resp, test=True)
+        with self.assertRaises(ValueError):
+            self.bundle.put_dhcp_info(message, test=True)
 
     def test__put_dhcp_info__unknown_iface(self):
         """
         put_dhcp_info (/network/ethernets/1/dhcp): unknown interface
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -543,23 +544,20 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"query": {}, "param": {}})
-
-        def resp(code=200, data=None):
-            self.assertEqual(404, code)
-
         message = Message({"data": {}, "query": {}, "param": {}})
         message.param["id"] = 3
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
-        self.bundle.put_dhcp_info(message, response=resp, test=True)
+        with self.assertRaises(ValueError):
+            self.bundle.put_dhcp_info(message, test=True)
 
     def test__put_dhcp_info(self):
         """
         put_dhcp_info (/network/ethernets/1/dhcp)
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -567,18 +565,19 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"query": {}, "param": {}})
-
-        def resp(code=200, data=None):
-            self.assertEqual(200, code)
-
         message = Message({"data": {}, "query": {}, "param": {}})
         message.param["id"] = 1
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
-        self.bundle.put_dhcp_info(message, response=resp, test=True)
+        self.bundle.put_dhcp_info(message, test=True)
+
+        data = self.bundle.read(1)
+        self.assertEqual("192.168.41.3", data["ip"])
+        self.assertEqual("255.255.255.0", data["netmask"])
+        self.assertEqual("192.168.41.254", data["gateway"])
+        self.assertEqual(["8.8.8.8"], data["dns"])
 
 
 if __name__ == "__main__":

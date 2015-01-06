@@ -4,10 +4,12 @@ import sys
 import subprocess
 import getopt
 import json
-from random import randint
+# from random import randint
 
 
 DHCP_RES = "/network/ethernets/:iface/dhcp"
+IFACE_RES = "/network/interfaces"
+
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(
@@ -27,6 +29,7 @@ if __name__ == "__main__":
         if opt == "-i":
             iface = int(arg.replace("eth", "")) + 1
             data["resource"] = DHCP_RES.replace(":iface", str(iface))
+            data["name"] = iface
         elif opt == "--ip":
             data["data"]["ip"] = arg
         elif opt == "--netmask":
@@ -38,16 +41,15 @@ if __name__ == "__main__":
         elif opt == "--dns":
             data["data"]["dns"] = arg
 
-    # send event to view
+    # send event to ethernet
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",
          "-m", "%s" % json.dumps(data, indent=2)],
         stdout=subprocess.PIPE)
 
-    # send request to model
-    data["id"] = randint(10000, 99999999)
-    data["tunnel"] = "ethernet-dhcp-updater"
+    # send event to views
+    data["resource"] = IFACE_RES
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",

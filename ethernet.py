@@ -98,6 +98,7 @@ class Ethernet(Sanji):
             for iface in ifaces:
                 ifaddr = ip.ifaddresses(iface)
                 db = copy.deepcopy(default_db)
+                db["name"] = iface
                 db["id"] = int(iface.replace("eth", "")) + 1
 
                 ip_3 = ip_3_def + db["id"]
@@ -351,7 +352,7 @@ class Ethernet(Sanji):
 
     @Route(methods="put", resource="/network/ethernets/:id/dhcp",
            schema=put_dhcp_schema)
-    def put_dhcp_info(self, message, response):
+    def put_dhcp_info(self, message):
         """
         /network/ethernets/1/dhcp
         "data": {
@@ -364,16 +365,15 @@ class Ethernet(Sanji):
         """
         # TODO: should be removed when schema worked for unittest
         if not hasattr(message, "data"):
-            return response(code=400,
-                            data={"message": "Invalid input."})
+            raise ValueError("Invalid input.")
 
         message.data["id"] = message.param["id"]
         try:
-            info = self.merge_info(message.data)
+            self.merge_info(message.data)
+            print self.model.db
             self.model.save_db()
-            return response(data=info)
         except Exception, e:
-            return response(code=404, data={"message": e.message})
+            raise ValueError("Invalid input: %s.", str(e))
 
 
 if __name__ == "__main__":

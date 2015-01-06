@@ -23,7 +23,7 @@
       "resource": "/network/ethernets/:id"
     },
     {
-      "methods": ["put"],
+      "role": "view",
       "resource": "/network/ethernets/:id/dhcp"
     }
   ]
