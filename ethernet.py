@@ -181,7 +181,6 @@ class Ethernet(Sanji):
             "enable": In(frozenset([0, 1])),
             Optional("type"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
-            Optional("enableDefaultGW"): In(frozenset([0, 1])),
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
             Optional("subnet"): Any(str, unicode),

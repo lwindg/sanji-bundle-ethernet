@@ -7,7 +7,6 @@
 		"gateway": "192.168.3.254",
 		"dns": [],
 		"enable": 1,
-		"enableDefaultGW": 0,
 		"enableDhcp": 0
 	}
 ]
