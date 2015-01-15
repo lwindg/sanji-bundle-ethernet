@@ -74,6 +74,10 @@ class Ethernet(Sanji):
         for iface in self.model.db:
             self.apply(iface)
 
+    def run(self):
+        for iface in self.model.db:
+            self.publish.event.put("/network/interfaces", data=iface)
+
     def load(self, path, ifaces):
         """
         Load the configuration. If configuration is not installed yet,
