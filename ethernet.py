@@ -96,7 +96,7 @@ class Ethernet(Sanji):
         # TODO: 1. type is always "WAN" for CS
         #       2. 1st iface's type is "LAN" with dhcp server; another is "WAN"
         if 1 == len(self.model.db) and "id" not in self.model.db[0]:
-            print "factory install"
+            logger.debug("factory install")
             default_db = self.model.db.pop()
             ip_3_def = int(default_db["ip"].split(".")[2]) - 1
             for iface in ifaces:
@@ -278,7 +278,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
-            print e
+            logger.debug(e)
             return response(code=400,
                             data={"message": e.message})
 
@@ -313,7 +313,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
-            print e
+            logger.debug(e)
             return response(code=400,
                             data={"message": e.message})
 
@@ -373,7 +373,7 @@ class Ethernet(Sanji):
         message.data["id"] = message.param["id"]
         try:
             self.merge_info(message.data)
-            print self.model.db
+            logger.debug(self.model.db)
             self.model.save_db()
         except Exception, e:
             raise ValueError("Invalid input: %s.", str(e))
