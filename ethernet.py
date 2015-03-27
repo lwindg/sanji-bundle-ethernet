@@ -74,6 +74,10 @@ class Ethernet(Sanji):
         for iface in self.model.db:
             self.apply(iface)
 
+    def run(self):
+        for iface in self.model.db:
+            self.publish.event.put("/network/interfaces", data=iface)
+
     def load(self, path, ifaces):
         """
         Load the configuration. If configuration is not installed yet,
@@ -181,7 +185,6 @@ class Ethernet(Sanji):
             "enable": In(frozenset([0, 1])),
             Optional("type"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
-            Optional("enableDefaultGW"): In(frozenset([0, 1])),
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
             Optional("subnet"): Any(str, unicode),
