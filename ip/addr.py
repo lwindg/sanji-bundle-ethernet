@@ -3,9 +3,8 @@
 import os
 import sh
 import ipcalc
+import logging
 
-# Used shell commands:
-#   echo, grep, awk, sed, sort, ip, iw
 # https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
 
 # Used python modules:
@@ -19,33 +18,51 @@ import ipcalc
 #   https://pypi.python.org/pypi/sh
 
 
+logger = logging.getLogger()
+
+
 def interfaces():
+    """List all interfaces.
+
+    Returns:
+        A list of interface names. For example:
+
+        ["eth0", "eth1", "wlan0"]
+
+    Raises:
+        FIXME
+    """
     # ifaces=$(ip a show | grep -Eo "[0-9]: wlan[0-9]" | sed "s/.*wlan//g")
     # ifaces=$(ip a show | grep -Eo '[0-9]: eth[0-9]' | awk '{print $2}')
     try:
         ifaces = os.listdir("/sys/class/net")
-        ifaces = [x for x in ifaces if not x.startswith("lo")]
+        ifaces = [x for x in ifaces if not
+                  (x.startswith("lo") or x.startswith("mon."))]
         return ifaces
     except Exception, e:
-        print "Cannot get interfaces: %s" % e
+        logger.info("Cannot get interfaces: %s" % e)
         raise e
 
 
 def ifaddresses(iface):
-    """
-    return {
-        "mac": "",
-        "link": 1,
-        "inet": [
-            {
-                "ip": "",
-                "netmask": "",
-                "subnet": "",
-                "broadcast": ""
-            }
-        ]
-    }
+    """Retrieve the detail information for an interface.
 
+    Args:
+        iface: interface name.
+
+    Returns:
+        A dict format data will be return. For example:
+
+        {"mac": "",
+         "link": 1,
+         "inet": [{
+             "ip": "",
+             "netmask": "",
+             "subnet": "",
+             "broadcast": ""}]}
+
+    Raises:
+        ValueError
     """
     info = dict()
     try:
@@ -89,6 +106,15 @@ def ifaddresses(iface):
 
 
 def ifupdown(iface, up):
+    """Set an interface to up or down status.
+
+    Args:
+        iface: interface name.
+        up: status for the interface, True for up and False for down.
+
+    Raises:
+        ValueError
+    """
     if not up:
         try:
             output = sh.awk(
@@ -107,6 +133,18 @@ def ifupdown(iface, up):
 
 
 def ifconfig(iface, dhcpc, ip="", netmask="24", gateway=""):
+    """Set the interface to static IP or dynamic IP (by dhcpclient).
+
+    Args:
+        iface: interface name.
+        dhcpc: True for using dynamic IP and False for static.
+        ip: IP address for static IP
+        netmask:
+        gateway:
+
+    Raises:
+        ValueError
+    """
     # TODO(aeluin) catch the exception?
     # Check if interface exist
     try:
