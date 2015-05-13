@@ -14,7 +14,7 @@ from voluptuous import Optional, Extra
 # from voluptuous import All
 from voluptuous import In, Range, Any
 # from voluptuous import Length, In, Range
-import ip
+import ip.addr as ip
 
 
 # TODO: logger should be defined in sanji package?
