@@ -1,6 +1,6 @@
 
-FILES = README.md bundle.json ethernet.py ip.py requirements.txt
-DIRS = data
+FILES = README.md bundle.json ethernet.py requirements.txt
+DIRS = data ip
 
 
 deb:
