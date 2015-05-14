@@ -6,8 +6,8 @@ RESOURCE    = network/$(NAME)
 LIBDIR      = $(DESTDIR)/usr/lib/sanji-$(SANJI_VER)/$(RESOURCE)
 TMPDIR      = $(DESTDIR)/tmp
 
-FILES       = bundle.json $(NAME).py ip.py
-DIRS        = data
+FILES       = bundle.json $(NAME).py
+DIRS        = data ip
 
 
 all:
