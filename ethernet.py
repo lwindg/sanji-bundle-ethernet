@@ -284,10 +284,13 @@ class Ethernet(Sanji):
 
         try:
             info = self.merge_info(message.data)
+            response(data=info)
+
             self.apply(info)
             self.model.save_db()
             self.model.backup_db()
-            return response(data=info)
+            self.publish.event.put("/network/interfaces", data=info)
+            # return response(data=info)
         except Exception, e:
             return response(code=404, data={"message": e.message})
 
@@ -324,6 +327,8 @@ class Ethernet(Sanji):
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
+                response(data=self.model.db)
+
                 self.apply(info)
                 self.model.save_db()
             except Exception, e:
@@ -331,7 +336,8 @@ class Ethernet(Sanji):
         self.model.backup_db()
         if error:
             return response(code=400, data={"message": error})
-        return response(data=self.model.db)
+        self.publish.event.put("/network/interfaces", data=info)
+        # return response(data=self.model.db)
 
     @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
