@@ -417,7 +417,12 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(2, len(data))
         message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.37"})
         message.data.append({"id": 2, "enable": 1, "ip": u"192.168.41.37"})
+
+        def mock_event_put(resource, data):
+            pass
+        self.bundle.publish.event.put = mock_event_put
         self.bundle.put(message, response=resp, test=True)
+
         data = self.bundle.read(1)
         self.assertEqual("192.168.31.37", data["ip"])
         data = self.bundle.read(2)
@@ -451,6 +456,10 @@ class TestEthernetClass(unittest.TestCase):
         message.data["id"] = 1
         message.data["enable"] = 1
         message.data["ip"] = u"192.168.31.39"
+
+        def mock_event_put(resource, data):
+            pass
+        self.bundle.publish.event.put = mock_event_put
         self.bundle.put(message, response=resp, test=True)
 
     @patch("ethernet.ip.ifupdown")
