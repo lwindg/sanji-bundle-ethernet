@@ -376,10 +376,10 @@ class Ethernet(Sanji):
         if not hasattr(message, "data"):
             raise ValueError("Invalid input.")
 
-        message.data["id"] = message.param["id"]
+        message.data["id"] = int(message.param["id"])
         try:
             self.merge_info(message.data)
-            print self.model.db
+            _logger.debug(self.model.db)
             self.model.save_db()
         except Exception, e:
             raise ValueError("Invalid input: %s.", str(e))

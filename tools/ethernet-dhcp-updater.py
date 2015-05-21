@@ -19,6 +19,7 @@ if __name__ == "__main__":
         exit(-1)
 
     data = {
+        "code": 200,
         "method": "put",
         "resource": DHCP_RES,
         "data": {
@@ -27,9 +28,9 @@ if __name__ == "__main__":
 
     for opt, arg in opts:
         if opt == "-i":
-            iface = int(arg.replace("eth", "")) + 1
-            data["resource"] = DHCP_RES.replace(":iface", str(iface))
-            data["name"] = iface
+            data["data"]["name"] = arg
+            id = int(arg.replace("eth", "")) + 1
+            data["resource"] = DHCP_RES.replace(":iface", str(id))
         elif opt == "--ip":
             data["data"]["ip"] = arg
         elif opt == "--netmask":
