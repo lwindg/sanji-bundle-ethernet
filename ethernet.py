@@ -141,7 +141,7 @@ class Ethernet(Sanji):
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
 
-    def read(self, id):
+    def read(self, id, test=False):
         """
         Read the setting for an interface.
 
@@ -159,18 +159,19 @@ class Ethernet(Sanji):
         data["currentStatus"] = ifaddr["link"]
         data["mac"] = ifaddr["mac"]
 
-        """Use configuration data instead of realtime retrieving
-        data["ip"] = ifaddr["inet"][0]["ip"]
-        data["netmask"] = ifaddr["inet"][0]["netmask"]
-        if "subnet" in ifaddr["inet"][0]:
-            data["subnet"] = ifaddr["inet"][0]["subnet"]
-        else:
-            data.pop("subnet")
-        if "broadcast" in ifaddr["inet"][0]:
-            data["broadcast"] = ifaddr["inet"][0]["broadcast"]
-        else:
-            data.pop("broadcast")
-        """
+        # """Use configuration data instead of realtime retrieving
+        if False == test:
+            data["ip"] = ifaddr["inet"][0]["ip"]
+            data["netmask"] = ifaddr["inet"][0]["netmask"]
+            if "subnet" in ifaddr["inet"][0]:
+                data["subnet"] = ifaddr["inet"][0]["subnet"]
+            else:
+                data.pop("subnet")
+            if "broadcast" in ifaddr["inet"][0]:
+                data["broadcast"] = ifaddr["inet"][0]["broadcast"]
+            elif "broadcast" in data:
+                data.pop("broadcast")
+        # """
         return data
 
     @staticmethod
@@ -375,7 +376,7 @@ class Ethernet(Sanji):
         if not hasattr(message, "data"):
             raise ValueError("Invalid input.")
 
-        message.data["id"] = message.param["id"]
+        message.data["id"] = int(message.param["id"])
         try:
             self.merge_info(message.data)
             _logger.debug(self.model.db)
