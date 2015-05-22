@@ -17,8 +17,7 @@ from voluptuous import In, Range, Any
 import ip.addr as ip
 
 
-# TODO: logger should be defined in sanji package?
-logger = logging.getLogger()
+_logger = logging.getLogger("sanji.ethernet")
 
 
 def merge(dest, src, path=None):
@@ -60,7 +59,7 @@ class Ethernet(Sanji):
         ifaces = ip.interfaces()
         ifaces = [x for x in ifaces if x.startswith("eth")]
         if 0 == len(ifaces):
-            logger.info("No interfaces to be configured.")
+            _logger.info("No interfaces to be configured.")
             self.stop()
             raise ValueError("No interfaces to be configured.")
 
@@ -96,7 +95,7 @@ class Ethernet(Sanji):
         # TODO: 1. type is always "WAN" for CS
         #       2. 1st iface's type is "LAN" with dhcp server; another is "WAN"
         if 1 == len(self.model.db) and "id" not in self.model.db[0]:
-            print "factory install"
+            _logger.debug("factory install")
             default_db = self.model.db.pop()
             ip_3_def = int(default_db["ip"].split(".")[2]) - 1
             for iface in ifaces:
@@ -278,7 +277,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
-            print e
+            _logger.debug(e, exc_info=True)
             return response(code=400,
                             data={"message": e.message})
 
@@ -316,7 +315,7 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
-            print e
+            _logger.debug(e, exc_info=True)
             return response(code=400,
                             data={"message": e.message})
 
@@ -388,7 +387,7 @@ class Ethernet(Sanji):
 if __name__ == "__main__":
     FORMAT = "%(asctime)s - %(levelname)s - %(lineno)s - %(message)s"
     logging.basicConfig(level=0, format=FORMAT)
-    logger = logging.getLogger("Ethernet")
+    _logger = logging.getLogger("sanji.ethernet")
 
     ethernet = Ethernet(connection=Mqtt())
     ethernet.start()
