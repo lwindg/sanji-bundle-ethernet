@@ -159,7 +159,7 @@ class Ethernet(Sanji):
         data["currentStatus"] = ifaddr["link"]
         data["mac"] = ifaddr["mac"]
 
-        """Use configuration data instead of realtime retrieving
+        # """Use configuration data instead of realtime retrieving
         data["ip"] = ifaddr["inet"][0]["ip"]
         data["netmask"] = ifaddr["inet"][0]["netmask"]
         if "subnet" in ifaddr["inet"][0]:
@@ -170,7 +170,7 @@ class Ethernet(Sanji):
             data["broadcast"] = ifaddr["inet"][0]["broadcast"]
         else:
             data.pop("broadcast")
-        """
+        # """
         return data
 
     @staticmethod
