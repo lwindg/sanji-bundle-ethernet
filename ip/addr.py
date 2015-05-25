@@ -96,10 +96,10 @@ def ifaddresses(iface):
         net = ipcalc.Network(ip)
         item = dict()
         item["ip"] = ip.split("/")[0]
-        item["netmask"] = net.netmask()
+        item["netmask"] = str(net.netmask())
         if 4 == net.version():
-            item["subnet"] = net.network()
-            item["broadcast"] = net.broadcast()
+            item["subnet"] = str(net.network())
+            item["broadcast"] = str(net.broadcast())
         info["inet"].append(item)
 
     return info
