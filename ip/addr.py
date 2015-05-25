@@ -82,16 +82,24 @@ def ifaddresses(iface):
         info["link"] = 0
 
     #    "ip addr show %s | grep inet | grep -v inet6 | awk '{print $2}'"
+    info["inet"] = list()
     try:
+        '''
         output = sh.awk(sh.grep(
             sh.ip("addr", "show", iface), "inet"),
             "{print $2}")
+        '''
+        output = sh.ip("addr", "show", iface)
+        try:
+            output = sh.awk(sh.grep(output, "inet"), "{print $2}")
+        except:
+            return info
     except sh.ErrorReturnCode_1:
         raise ValueError("Device \"%s\" does not exist." % iface)
     except:
         raise ValueError("Unknown error for \"%s\"." % iface)
 
-    info["inet"] = list()
+    # info["inet"] = list()
     for ip in output.split():
         net = ipcalc.Network(ip)
         item = dict()

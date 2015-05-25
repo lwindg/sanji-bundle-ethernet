@@ -160,7 +160,15 @@ class Ethernet(Sanji):
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving
-        if False == test:
+        if True == test:
+            return data
+
+        data["ip"] = ""
+        data["netmask"] = ""
+        data["subnet"] = ""
+        data["broadcast"] = ""
+        # data["gateway"] = ""
+        if ifaddr["inet"] and len(ifaddr["inet"]):
             data["ip"] = ifaddr["inet"][0]["ip"]
             data["netmask"] = ifaddr["inet"][0]["netmask"]
             if "subnet" in ifaddr["inet"][0]:
