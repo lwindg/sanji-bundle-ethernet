@@ -298,6 +298,7 @@ class Ethernet(Sanji):
             self.model.save_db()
             self.model.backup_db()
             self.publish.event.put("/network/interfaces", data=info)
+            self.publish.put("/system/remote", data={"enable": 1})
             # return response(data=info)
         except Exception, e:
             return response(code=404, data={"message": e.message})
@@ -345,6 +346,7 @@ class Ethernet(Sanji):
         if error:
             return response(code=400, data={"message": error})
         self.publish.event.put("/network/interfaces", data=info)
+        self.publish.put("/system/remote", data={"enable": 1})
         # return response(data=self.model.db)
 
     @Route(methods="put", resource="/network/ethernets/:id")
