@@ -356,11 +356,17 @@ class TestEthernetClass(unittest.TestCase):
             }
         ]
         """
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+        self.bundle.publish.event.put = mock_put
+
         # case: one interface is not exist (bulk); exist one will be updated
         message = Message({"data": [], "query": {}, "param": {}})
 
+        # always true for response reply before apply the settings
         def resp(code=200, data=None):
-            self.assertEqual(400, code)
+            self.assertEqual(200, code)
         message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.36"})
         message.data.append({"id": 3, "enable": 1})
         self.bundle.put(message, response=resp, test=True)
@@ -412,6 +418,10 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"data": [], "query": {}, "param": {}})
 
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
         def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, len(data))
@@ -446,6 +456,10 @@ class TestEthernetClass(unittest.TestCase):
         ]
         """
         message = Message({"data": [], "query": {}, "param": {}})
+
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
 
         def resp(code=200, data=None):
             self.assertEqual(200, code)
