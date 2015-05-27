@@ -335,7 +335,7 @@ class Ethernet(Sanji):
 
         response(data=message.data)
         # self.publish.put("/system/remote", data={"enable": 0})
-        error = None
+        # error = None
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
@@ -344,10 +344,13 @@ class Ethernet(Sanji):
                 self.apply(info)
                 self.model.save_db()
             except Exception, e:
-                error = e.message
+                # error = e.message
+                pass
         self.model.backup_db()
+        '''
         if error:
             return response(code=400, data={"message": error})
+        '''
         self.publish.event.put("/network/interfaces", data=info)
         self.publish.put("/system/remote", data={"enable": 1})
         # return response(data=self.model.db)
