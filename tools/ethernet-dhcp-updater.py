@@ -40,7 +40,7 @@ if __name__ == "__main__":
         elif opt == "--gateway":
             data["data"]["gateway"] = arg
         elif opt == "--dns":
-            data["data"]["dns"] = arg
+            data["data"]["dns"] = arg.split()
 
     # send event to ethernet
     subprocess.Popen(

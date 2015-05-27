@@ -294,6 +294,7 @@ class Ethernet(Sanji):
             info = self.merge_info(message.data)
             response(data=info)
 
+            # self.publish.put("/system/remote", data={"enable": 0})
             self.apply(info)
             self.model.save_db()
             self.model.backup_db()
@@ -332,11 +333,13 @@ class Ethernet(Sanji):
         if "id" in message.param:
             return self._put_by_id(message=message, response=response)
 
+        response(data=message.data)
+        # self.publish.put("/system/remote", data={"enable": 0})
         error = None
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
-                response(data=self.model.db)
+                # response(data=self.model.db)
 
                 self.apply(info)
                 self.model.save_db()
