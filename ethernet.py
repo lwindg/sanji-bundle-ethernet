@@ -3,6 +3,7 @@
 
 import os
 import copy
+import time
 import logging
 from sanji.core import Sanji
 from sanji.core import Route
@@ -294,11 +295,13 @@ class Ethernet(Sanji):
             info = self.merge_info(message.data)
             response(data=info)
 
-            # self.publish.put("/system/remote", data={"enable": 0})
+            time.sleep(2)
+            self.publish.put("/system/remote", data={"enable": 0})
             self.apply(info)
             self.model.save_db()
             self.model.backup_db()
             self.publish.event.put("/network/interfaces", data=info)
+            time.sleep(2)
             self.publish.put("/system/remote", data={"enable": 1})
             # return response(data=info)
         except Exception, e:
@@ -334,7 +337,8 @@ class Ethernet(Sanji):
             return self._put_by_id(message=message, response=response)
 
         response(data=message.data)
-        # self.publish.put("/system/remote", data={"enable": 0})
+        time.sleep(2)
+        self.publish.put("/system/remote", data={"enable": 0})
         # error = None
         for iface in message.data:
             try:
@@ -343,6 +347,7 @@ class Ethernet(Sanji):
 
                 self.apply(info)
                 self.model.save_db()
+                self.publish.event.put("/network/interfaces", data=info)
             except Exception, e:
                 # error = e.message
                 pass
@@ -351,7 +356,7 @@ class Ethernet(Sanji):
         if error:
             return response(code=400, data={"message": error})
         '''
-        self.publish.event.put("/network/interfaces", data=info)
+        time.sleep(2)
         self.publish.put("/system/remote", data={"enable": 1})
         # return response(data=self.model.db)
 

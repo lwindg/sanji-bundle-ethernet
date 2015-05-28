@@ -103,7 +103,7 @@ def ifaddresses(iface):
     for ip in output.split():
         net = ipcalc.Network(ip)
         item = dict()
-        item["ip"] = ip.split("/")[0]
+        item["ip"] = str(ip.split("/")[0])
         item["netmask"] = str(net.netmask())
         if 4 == net.version():
             item["subnet"] = str(net.network())
