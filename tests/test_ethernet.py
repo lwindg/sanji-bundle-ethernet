@@ -338,11 +338,12 @@ class TestEthernetClass(unittest.TestCase):
         message.data.append({"id": 0, "enable": 1})
         self.bundle.put(message, response=resp, test=True)
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
     def test__put__partial_success(self, mock_ifaddresses, mock_ifconfig,
-                                   mock_ifupdown):
+                                   mock_ifupdown, mock_sleep):
         """
         put (/network/ethernets): one interface is not exist
         "data": [
@@ -399,10 +400,12 @@ class TestEthernetClass(unittest.TestCase):
         message.data.append({"id": 3, "enable": 1})
         self.bundle.put(message, response=resp, test=True)
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown,
+                  mock_sleep):
         """
         put (/network/ethernets)
         "data": [
@@ -438,10 +441,12 @@ class TestEthernetClass(unittest.TestCase):
         data = self.bundle.read(2, test=True)
         self.assertEqual("192.168.41.37", data["ip"])
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put__by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put__by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown,
+                         mock_sleep):
         """
         put (/network/ethernets): by id
         "data": [
@@ -476,11 +481,12 @@ class TestEthernetClass(unittest.TestCase):
         self.bundle.publish.event.put = mock_event_put
         self.bundle.put(message, response=resp, test=True)
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
     def test__put_by_id__invalid_json(self, mock_ifaddresses, mock_ifconfig,
-                                      mock_ifupdown):
+                                      mock_ifupdown, mock_sleep):
         """
         put_by_id (/network/ethernets/1): invalid json schema
         "data": {
@@ -495,11 +501,12 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(400, code)
         self.bundle.put_by_id(message, response=resp, test=True)
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
     def test__put_by_id__unknown_iface(self, mock_ifaddresses, mock_ifconfig,
-                                       mock_ifupdown):
+                                       mock_ifupdown, mock_sleep):
         """
         put_by_id (/network/ethernets/3): unknown interface
         "data": {
@@ -509,6 +516,10 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"data": {}, "query": {}, "param": {}})
 
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
         def resp(code=200, data=None):
             self.assertEqual(404, code)
         message.data["id"] = 3
@@ -516,10 +527,12 @@ class TestEthernetClass(unittest.TestCase):
         message.data["ip"] = u"192.168.31.37"
         self.bundle.put_by_id(message, response=resp, test=True)
 
+    @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test__put_by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+    def test__put_by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown,
+                        mock_sleep):
         """
         put_by_id (/network/ethernets/1)
         "data": {
@@ -528,6 +541,10 @@ class TestEthernetClass(unittest.TestCase):
         }
         """
         message = Message({"data": {}, "query": {}, "param": {}})
+
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
 
         def resp(code=200, data=None):
             self.assertEqual(404, code)

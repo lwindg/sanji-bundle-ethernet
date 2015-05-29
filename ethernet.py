@@ -3,6 +3,7 @@
 
 import os
 import copy
+import time
 import logging
 from sanji.core import Sanji
 from sanji.core import Route
@@ -291,17 +292,24 @@ class Ethernet(Sanji):
                             data={"message": e.message})
 
         try:
-            info = self.merge_info(message.data)
+            info = copy.deepcopy(self.merge_info(message.data))
             response(data=info)
 
-            # self.publish.put("/system/remote", data={"enable": 0})
+            time.sleep(2)
+            self.publish.put("/system/remote", data={"enable": 0})
+
             self.apply(info)
             self.model.save_db()
             self.model.backup_db()
             self.publish.event.put("/network/interfaces", data=info)
+
+            time.sleep(2)
             self.publish.put("/system/remote", data={"enable": 1})
+            # time.sleep(2)
             # return response(data=info)
         except Exception, e:
+            self.publish.put("/system/remote", data={"enable": 1})
+            time.sleep(2)
             return response(code=404, data={"message": e.message})
 
     @Route(methods="put", resource="/network/ethernets")
@@ -334,26 +342,27 @@ class Ethernet(Sanji):
             return self._put_by_id(message=message, response=response)
 
         response(data=message.data)
-        # self.publish.put("/system/remote", data={"enable": 0})
+        time.sleep(2)
+        self.publish.put("/system/remote", data={"enable": 0})
         # error = None
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
-                # response(data=self.model.db)
-
                 self.apply(info)
                 self.model.save_db()
+                self.publish.event.put("/network/interfaces", data=info)
             except Exception, e:
                 # error = e.message
                 pass
         self.model.backup_db()
+        time.sleep(2)
+        self.publish.put("/system/remote", data={"enable": 1})
         '''
+        time.sleep(2)
         if error:
             return response(code=400, data={"message": error})
+        return response(data=self.model.db)
         '''
-        self.publish.event.put("/network/interfaces", data=info)
-        self.publish.put("/system/remote", data={"enable": 1})
-        # return response(data=self.model.db)
 
     @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
