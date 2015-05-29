@@ -1,6 +1,6 @@
 {
   "name": "ethernet",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "author": "Aeluin Chen",
   "email": "aeluin.chen@moxa.com",
   "description": "Handle the Ethernet interfaces",
@@ -25,6 +25,10 @@
     {
       "role": "view",
       "resource": "/network/ethernets/:id/dhcp"
+    },
+    {
+      "role": "view",
+      "resource": "/system/remote"
     }
   ]
 }
