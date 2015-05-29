@@ -516,6 +516,10 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"data": {}, "query": {}, "param": {}})
 
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
         def resp(code=200, data=None):
             self.assertEqual(404, code)
         message.data["id"] = 3
@@ -537,6 +541,10 @@ class TestEthernetClass(unittest.TestCase):
         }
         """
         message = Message({"data": {}, "query": {}, "param": {}})
+
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
 
         def resp(code=200, data=None):
             self.assertEqual(404, code)
