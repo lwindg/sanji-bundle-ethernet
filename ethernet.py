@@ -155,6 +155,9 @@ class Ethernet(Sanji):
         else:
             return None
 
+        # deepcopy to prevent settings be modified
+        data = copy.deepcopy(data)
+
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
         data["currentStatus"] = ifaddr["link"]
@@ -292,15 +295,14 @@ class Ethernet(Sanji):
                             data={"message": e.message})
 
         try:
-            info = copy.deepcopy(self.merge_info(message.data))
+            info = self.merge_info(message.data)
             response(data=info)
 
             time.sleep(2)
             self.publish.put("/system/remote", data={"enable": 0})
 
             self.apply(info)
-            self.model.save_db()
-            self.model.backup_db()
+            self.save()
             self.publish.event.put("/network/interfaces", data=info)
 
             time.sleep(2)
