@@ -52,9 +52,9 @@ class Ethernet(Sanji):
         except KeyError:
             bundle_env = os.getenv("BUNDLE_ENV", "debug")
 
-        path_root = os.path.abspath(os.path.dirname(__file__))
+        self.path_root = os.path.abspath(os.path.dirname(__file__))
         if bundle_env == "debug":  # pragma: no cover
-            path_root = "%s/tests" % path_root
+            self.path_root = "%s/tests" % self.path_root
 
         # Find all ethernet interfaces and load the configuration
         ifaces = ip.interfaces()
@@ -65,7 +65,7 @@ class Ethernet(Sanji):
             raise ValueError("No interfaces to be configured.")
 
         try:
-            self.load(path_root, ifaces)
+            self.load(self.path_root, ifaces)
         except:
             self.stop()
             raise IOError("Cannot load any configuration.")
@@ -137,7 +137,8 @@ class Ethernet(Sanji):
             return
 
         if data["enableDhcp"]:
-            ip.ifconfig(iface, True)
+            ip.ifconfig(iface, True, script="%s/hooks/dhclient-script" %
+                        self.path_root)
         else:
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
