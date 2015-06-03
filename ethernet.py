@@ -250,6 +250,7 @@ class Ethernet(Sanji):
             data = self.read(iface["id"])
             if data:
                 collection.append(data)
+        collection = sorted(collection, key=lambda k: k["id"])
         return response(data=collection)
 
         '''capability function removed
