@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import sys
-import subprocess
+# import subprocess
+import sh
 import getopt
 import json
 # from random import randint
 
 
-DHCP_RES = "/network/ethernets/:iface/dhcp"
+DHCP_RES = "/network/interfaces/dhcp"
 IFACE_RES = "/network/interfaces"
 
 if __name__ == "__main__":
@@ -29,8 +30,6 @@ if __name__ == "__main__":
     for opt, arg in opts:
         if opt == "-i":
             data["data"]["name"] = arg
-            id = int(arg.replace("eth", "")) + 1
-            data["resource"] = DHCP_RES.replace(":iface", str(id))
         elif opt == "--ip":
             data["data"]["ip"] = arg
         elif opt == "--netmask":
@@ -43,16 +42,23 @@ if __name__ == "__main__":
             data["data"]["dns"] = arg.split()
 
     # send event to ethernet
+    data["resource"] = DHCP_RES
+    sh.mosquitto_pub("-t", "/controller", "-m", json.dumps(data, indent=2))
+    '''
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",
          "-m", "%s" % json.dumps(data, indent=2)],
         stdout=subprocess.PIPE)
+    '''
 
     # send event to views
     data["resource"] = IFACE_RES
+    sh.mosquitto_pub("-t", "/controller", "-m", json.dumps(data, indent=2))
+    '''
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",
          "-m", "%s" % json.dumps(data, indent=2)],
         stdout=subprocess.PIPE)
+    '''

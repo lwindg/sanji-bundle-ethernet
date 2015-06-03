@@ -379,6 +379,7 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
+        "name": Any(str, unicode),
         "ip": Any(str, unicode),
         "netmask": Any(str, unicode),
         Optional("subnet"): Any(str, unicode),
@@ -387,12 +388,13 @@ class Ethernet(Sanji):
         Extra: object
     }, required=True)
 
-    @Route(methods="put", resource="/network/ethernets/:id/dhcp",
+    @Route(methods="put", resource="/network/interfaces/dhcp",
            schema=put_dhcp_schema)
     def put_dhcp_info(self, message):
         """
-        /network/ethernets/1/dhcp
+        /network/interfaces/dhcp
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -404,7 +406,10 @@ class Ethernet(Sanji):
         if not hasattr(message, "data"):
             raise ValueError("Invalid input.")
 
-        message.data["id"] = int(message.param["id"])
+        if "name" not in message.data or "eth" not in message.data["name"]:
+            return
+
+        message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
         try:
             self.merge_info(message.data)
             _logger.debug(self.model.db)

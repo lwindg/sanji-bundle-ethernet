@@ -8,7 +8,7 @@ declare -x TERM="xterm"
 
 # include basic sanji functions
 # TODO: change to correct path
-UPDATER=/home/model/network/ethernets/ethernet-dhcp-updater.py
+UPDATER=/usr/lib/sanji-1.0/ethernet/tools/dhclient-updater.py
 
 
 # update data of ethernet model
@@ -21,21 +21,17 @@ secondDns=${dns_array[1]}
 thirdDns=${dns_array[2]}
 new_subnet=`ipcalc -b ${new_ip_address}/${new_subnet_mask} | awk '/Network/{print $2}' | cut -d '/' -f 1`
 
-if echo ${interface} | grep "eth"; then
-	sleep 5
-	python "${UPDATER}" -i "${interface}" \
-		--ip "${new_ip_address}" \
-		--netmask "${new_subnet_mask}" \
-		--subnet "${new_subnet}" \
-		--gateway "${new_routers}" \
-		--dns "${new_domain_name_servers}"
+python "${UPDATER}" -i "${interface}" \
+	--ip "${new_ip_address}" \
+	--netmask "${new_subnet_mask}" \
+	--subnet "${new_subnet}" \
+	--gateway "${new_routers}" \
+	--dns "${new_domain_name_servers}"
 
-	# prevent to modify default route and DNS automatically
-	unset new_routers
+# prevent to modify default route and DNS automatically
+unset new_routers
 
-	make_resolv_conf()
-	{
-		:
-	}
-fi
-
+make_resolv_conf()
+{
+	:
+}
