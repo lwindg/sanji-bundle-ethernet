@@ -1,3 +1,10 @@
+sanji-bundle-ethernet (0.9.8) unstable; urgency=low
+
+  * Using customized script instead of default script with hook script for
+    dhclient to prevent DNS and default gateway be updated.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 04 Jun 2015 17:50:35 +0800
+
 sanji-bundle-ethernet (0.9.0) unstable; urgency=low
 
   * Initial Release.
