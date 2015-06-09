@@ -557,7 +557,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test__put_dhcp_info__invalid_json(self):
         """
-        put_dhcp_info (/network/ethernets/1/dhcp): invalid json schema
+        put_dhcp_info (/network/interfaces/dhcp): invalid json schema
         "data": {
             "name": "",
             "ip": "",
@@ -574,7 +574,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test__put_dhcp_info__unknown_iface(self):
         """
-        put_dhcp_info (/network/ethernets/1/dhcp): unknown interface
+        put_dhcp_info (/network/interfaces/dhcp): unknown interface
         "data": {
             "name": "",
             "ip": "",
@@ -585,7 +585,7 @@ class TestEthernetClass(unittest.TestCase):
         }
         """
         message = Message({"data": {}, "query": {}, "param": {}})
-        message.param["id"] = 3
+        message.data["name"] = "eth2"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
@@ -596,7 +596,7 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifaddresses")
     def test__put_dhcp_info(self, mock_ifaddresses):
         """
-        put_dhcp_info (/network/ethernets/1/dhcp)
+        put_dhcp_info (/network/interfaces/dhcp)
         "data": {
             "name": "",
             "ip": "",
@@ -607,7 +607,7 @@ class TestEthernetClass(unittest.TestCase):
         }
         """
         message = Message({"data": {}, "query": {}, "param": {}})
-        message.param["id"] = 2
+        message.data["name"] = "eth1"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"

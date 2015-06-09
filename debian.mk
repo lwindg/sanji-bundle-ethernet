@@ -1,13 +1,13 @@
 
 # Where to put executable commands/icons/conf on 'make install'?
-SANJI_VER   = 1.0
+SANJI_VER   ?= 1.0
 NAME        = ethernet
 RESOURCE    = network/$(NAME)
-LIBDIR      = $(DESTDIR)/usr/lib/sanji-$(SANJI_VER)/$(RESOURCE)
+LIBDIR      = $(DESTDIR)/usr/lib/sanji-$(SANJI_VER)/$(NAME)
 TMPDIR      = $(DESTDIR)/tmp
 
 FILES       = bundle.json $(NAME).py
-DIRS        = data ip
+DIRS        = data ip hooks tools
 
 
 all:

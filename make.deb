@@ -1,7 +1,12 @@
 
+VER  ?=
+DIST ?= unstable
 FILES = README.md bundle.json ethernet.py requirements.txt
-DIRS = data ip
+DIRS  = data ip hooks tools
 
+
+release:
+	@$(CURDIR)/release.sh $(DIST) $(VER)
 
 deb:
 	mkdir -p deb
@@ -9,7 +14,7 @@ deb:
 	cp -a debian.mk deb/Makefile
 	cp -a README.md $(FILES) $(DIRS) deb/
 	(cd deb; \
-		dpkg-buildpackage -us -uc -rfakeroot;)
+		dpkg-buildpackage -us -uc -rfakeroot; )
 
 clean:
 	rm -rf deb
