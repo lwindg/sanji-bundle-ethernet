@@ -1,24 +1,24 @@
 # sanji-ethernet
-Ethernet model.
+
+This bundle handle the ethernet interfaces.
 
 ## Usage
 
-### Release a New Version
-Both `debian/changelog` and `bundle.json` will be updated by new version.
+### Release the Source Package
+The version is located in `bundle.json`.
 
 ```
-make release [DIST=] [VER=]
+make archive
 ```
-
-arguments:
- - [DIST]     optional; default is unstable
- - [VER]      optional; the version will be increased automatically by default
 
 ### Build Debian Package
 ```
-make deb [SANJI_VER=]
+make -C build-deb
 ```
 
-arguments:
- - [SANJI_VER]  optional; sanji's version, default to 1.0
+### Commit Changes
+Whenever a set of changes are ready to be committed, you should:
+
+1. Update `version` in `bundle.json`.
+2. Use `make -C build-deb changelog` to add change-logs.
 
