@@ -1,15 +1,14 @@
 PROJ_DIR    = $(abspath ..)
-NAME        = $(shell cat $(PROJ_DIR)/bundle.json | sed -n 's/"name"//p' | tr -d '", :')
-PROJECT     = sanji-bundle-$(NAME)
 
+NAME        = $(shell cat $(PROJ_DIR)/bundle.json | sed -n 's/"name"//p' | tr -d '", :')
 VERSION     = $(shell cat $(PROJ_DIR)/bundle.json | sed -n 's/"version"//p' | tr -d '", :')
+
+PROJECT     = sanji-bundle-$(NAME)
 DEBVERSION  = 1
 DIST        ?= unstable
 
-SRC         = $(PROJECT)-$(VERSION)
-STAGING_DIR = $(abspath $(SRC))
-
-UPSTREAM_ARCHIVE = $(SRC).tar.gz
+STAGING_DIR = $(abspath $(PROJECT)-$(VERSION))
+UPSTREAM_ARCHIVE = $(PROJECT)-$(VERSION).tar.gz
 
 FILES = \
 	$(STAGING_DIR)/debian/changelog \
@@ -42,4 +41,4 @@ changelog:
 		--release-heuristic log
 
 clean:
-	rm -rf $(STAGING_DIR) $(PROJECT)-*
+	rm -rf $(STAGING_DIR) $(PROJECT)-* $(PROJECT)_*
