@@ -557,7 +557,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test__put_dhcp_info__invalid_json(self):
         """
-        put_dhcp_info (/network/interfaces/dhcp): invalid json schema
+        put_dhcp_info (/network/interface/dhcp): invalid json schema
         "data": {
             "name": "",
             "ip": "",
@@ -574,7 +574,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test__put_dhcp_info__unknown_iface(self):
         """
-        put_dhcp_info (/network/interfaces/dhcp): unknown interface
+        put_dhcp_info (/network/interface/dhcp): unknown interface
         "data": {
             "name": "",
             "ip": "",
@@ -596,7 +596,7 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifaddresses")
     def test__put_dhcp_info(self, mock_ifaddresses):
         """
-        put_dhcp_info (/network/interfaces/dhcp)
+        put_dhcp_info (/network/interface/dhcp)
         "data": {
             "name": "",
             "ip": "",

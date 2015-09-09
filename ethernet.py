@@ -76,7 +76,7 @@ class Ethernet(Sanji):
 
     def run(self):
         for iface in self.model.db:
-            self.publish.event.put("/network/interfaces", data=iface)
+            self.publish.event.put("/network/interface", data=iface)
 
     def load(self, path, ifaces):
         """
@@ -300,20 +300,26 @@ class Ethernet(Sanji):
             info = self.merge_info(message.data)
             response(data=info)
 
+            """
             time.sleep(2)
             self.publish.put("/system/remote", data={"enable": 0})
+            """
 
             self.apply(info)
             self.save()
-            self.publish.event.put("/network/interfaces", data=info)
+            self.publish.event.put("/network/interface", data=info)
 
+            """
             time.sleep(2)
             self.publish.put("/system/remote", data={"enable": 1})
+            """
             # time.sleep(2)
             # return response(data=info)
         except Exception, e:
+            """
             self.publish.put("/system/remote", data={"enable": 1})
             time.sleep(2)
+            """
             return response(code=404, data={"message": e.message})
 
     @Route(methods="put", resource="/network/ethernets")
@@ -346,21 +352,25 @@ class Ethernet(Sanji):
             return self._put_by_id(message=message, response=response)
 
         response(data=message.data)
+        """
         time.sleep(2)
         self.publish.put("/system/remote", data={"enable": 0})
+        """
         # error = None
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
-                self.publish.event.put("/network/interfaces", data=info)
+                self.publish.event.put("/network/interface", data=info)
             except Exception, e:
                 # error = e.message
                 pass
         self.model.backup_db()
+        """
         time.sleep(2)
         self.publish.put("/system/remote", data={"enable": 1})
+        """
         '''
         time.sleep(2)
         if error:
@@ -389,11 +399,11 @@ class Ethernet(Sanji):
         Extra: object
     }, required=True)
 
-    @Route(methods="put", resource="/network/interfaces/dhcp",
+    @Route(methods="put", resource="/network/interface/dhcp",
            schema=put_dhcp_schema)
     def put_dhcp_info(self, message):
         """
-        /network/interfaces/dhcp
+        /network/interface/dhcp
         "data": {
             "name": "",
             "ip": "",
