@@ -127,7 +127,7 @@ class TestEthernetClass(unittest.TestCase):
         load: no configuration file
         """
         # case: cannot load any configuration
-        with self.assertRaises(IOError):
+        with self.assertRaises(Exception):
             self.bundle.load("%s/mock" % dirpath, [])
 
     def test__save(self):
