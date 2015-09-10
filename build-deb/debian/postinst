@@ -20,10 +20,10 @@ set -e
 
 case "$1" in
     configure)
-        pip install -r /tmp/packages/requirements.txt || \
-            pip install --no-index --find-links file:/tmp/packages \
-                -r /tmp/packages/requirements.txt
-	rm -rf /tmp/packages
+        pip install -r /tmp/sanji-bundle-ethernet-packages/requirements.txt || \
+            pip install --no-index --find-links file:/tmp/sanji-bundle-ethernet-packages \
+                -r /tmp/sanji-bundle-ethernet-packages/requirements.txt
+	rm -rf /tmp/sanji-bundle-ethernet-packages
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

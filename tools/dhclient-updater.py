@@ -8,8 +8,8 @@ import json
 # from random import randint
 
 
-DHCP_RES = "/network/interfaces/dhcp"
-IFACE_RES = "/network/interfaces"
+DHCP_RES = "/network/interface/dhcp"
+IFACE_RES = "/network/interface"
 
 if __name__ == "__main__":
     try:
