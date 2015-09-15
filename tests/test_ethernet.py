@@ -371,7 +371,7 @@ class TestEthernetClass(unittest.TestCase):
         message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.36"})
         message.data.append({"id": 3, "enable": 1})
         self.bundle.put(message, response=resp, test=True)
-        data = self.bundle.read(1, test=True)
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.36", data["ip"])
 
     @patch("ethernet.ip.ifupdown")
@@ -435,9 +435,9 @@ class TestEthernetClass(unittest.TestCase):
         self.bundle.publish.event.put = mock_event_put
         self.bundle.put(message, response=resp, test=True)
 
-        data = self.bundle.read(1, test=True)
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.37", data["ip"])
-        data = self.bundle.read(2, test=True)
+        data = self.bundle.read(2, config=True)
         self.assertEqual("192.168.41.37", data["ip"])
 
     # @patch("ethernet.time.sleep")
@@ -549,7 +549,7 @@ class TestEthernetClass(unittest.TestCase):
         message.data["enable"] = 0
         message.data["ip"] = u"192.168.31.40"
         self.bundle.put_by_id(message, response=resp, test=True)
-        data = self.bundle.read(1, test=True)
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.40", data["ip"])
 
     def test__put_dhcp_info__invalid_json(self):
@@ -611,7 +611,7 @@ class TestEthernetClass(unittest.TestCase):
         message.data["dns"] = ["8.8.8.8"]
         self.bundle.put_dhcp_info(message, test=True)
 
-        data = self.bundle.read(2, test=True)
+        data = self.bundle.read(2, config=True)
         self.assertEqual("192.168.41.3", data["ip"])
         self.assertEqual("255.255.255.0", data["netmask"])
         self.assertEqual("192.168.41.254", data["gateway"])

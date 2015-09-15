@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.9.10-1) unstable; urgency=low
+
+  * Add "restart" for PUT responst.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 01 Oct 2015 14:48:03 +0800
+
 sanji-bundle-ethernet (0.9.9-1) unstable; urgency=low
 
   * Don't send event to remote bundle, only support local site currently.

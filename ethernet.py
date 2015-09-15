@@ -18,6 +18,7 @@ from voluptuous import In, Range, Any
 import ip.addr as ip
 
 
+logging.basicConfig(level=logging.INFO)
 _logger = logging.getLogger("sanji.ethernet")
 
 
@@ -93,8 +94,7 @@ class Ethernet(Sanji):
             raise IOError("Cannot load any configuration.")
 
         # Initialise the interfaces
-        # TODO: 1. type is always "WAN" for CS
-        #       2. 1st iface's type is "LAN" with dhcp server; another is "WAN"
+        # TODO: 2nd iface's type is "LAN"; another is "WAN"
         if 1 == len(self.model.db) and "id" not in self.model.db[0]:
             _logger.debug("factory install")
             default_db = self.model.db.pop()
@@ -143,7 +143,7 @@ class Ethernet(Sanji):
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
 
-    def read(self, id, test=False):
+    def read(self, id, restart=False, config=False):
         """
         Read the setting for an interface.
 
@@ -159,13 +159,16 @@ class Ethernet(Sanji):
         # deepcopy to prevent settings be modified
         data = copy.deepcopy(data)
 
+        if not restart and "restart" in data:
+            data.pop("restart")
+
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
         data["currentStatus"] = ifaddr["link"]
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving
-        if True == test:
+        if True == config:
             return data
 
         data["ip"] = ""
@@ -196,7 +199,7 @@ class Ethernet(Sanji):
         schema = Schema({
             "id": Range(min=1),
             "enable": In(frozenset([0, 1])),
-            Optional("type"): In(frozenset([0, 1])),
+            Optional("wan"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
@@ -298,28 +301,29 @@ class Ethernet(Sanji):
 
         try:
             info = self.merge_info(message.data)
-            response(data=info)
+            resp = copy.deepcopy(info)
 
-            """
-            time.sleep(2)
-            self.publish.put("/system/remote", data={"enable": 0})
-            """
+            restart = 0
+            if "restart" in info:
+                restart = info["restart"]
+
+            current = self.read(info["id"])
+            if restart == 1 and current["ip"] != info["ip"]:
+                resp["restart"] = 1
+            else:
+                resp["restart"] = 0
+
+            if 1 == resp["restart"]:
+                response(data=resp)
 
             self.apply(info)
             self.save()
             self.publish.event.put("/network/interface", data=info)
 
-            """
-            time.sleep(2)
-            self.publish.put("/system/remote", data={"enable": 1})
-            """
-            # time.sleep(2)
-            # return response(data=info)
+            if 0 == resp["restart"]:
+                # time.sleep(2)
+                return response(data=resp)
         except Exception, e:
-            """
-            self.publish.put("/system/remote", data={"enable": 1})
-            time.sleep(2)
-            """
             return response(code=404, data={"message": e.message})
 
     @Route(methods="put", resource="/network/ethernets")
@@ -352,10 +356,7 @@ class Ethernet(Sanji):
             return self._put_by_id(message=message, response=response)
 
         response(data=message.data)
-        """
-        time.sleep(2)
-        self.publish.put("/system/remote", data={"enable": 0})
-        """
+
         # error = None
         for iface in message.data:
             try:
@@ -367,10 +368,6 @@ class Ethernet(Sanji):
                 # error = e.message
                 pass
         self.model.backup_db()
-        """
-        time.sleep(2)
-        self.publish.put("/system/remote", data={"enable": 1})
-        """
         '''
         time.sleep(2)
         if error:
