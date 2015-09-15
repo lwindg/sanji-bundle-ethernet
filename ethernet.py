@@ -93,8 +93,7 @@ class Ethernet(Sanji):
             raise IOError("Cannot load any configuration.")
 
         # Initialise the interfaces
-        # TODO: 1. type is always "WAN" for CS
-        #       2. 1st iface's type is "LAN" with dhcp server; another is "WAN"
+        # TODO: 2nd iface's type is "LAN"; another is "WAN"
         if 1 == len(self.model.db) and "id" not in self.model.db[0]:
             _logger.debug("factory install")
             default_db = self.model.db.pop()
@@ -196,7 +195,7 @@ class Ethernet(Sanji):
         schema = Schema({
             "id": Range(min=1),
             "enable": In(frozenset([0, 1])),
-            Optional("type"): In(frozenset([0, 1])),
+            Optional("wan"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
