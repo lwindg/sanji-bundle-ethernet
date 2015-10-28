@@ -143,7 +143,7 @@ class Ethernet(Sanji):
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
 
-    def read(self, id, restart=False, config=False):
+    def read(self, id, restart=False, config=True):
         """
         Read the setting for an interface.
 
