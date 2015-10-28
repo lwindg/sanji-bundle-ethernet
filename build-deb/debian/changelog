@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.9.11-1) unstable; urgency=low
+
+  * Change default read behavior.
+
+ -- Zack YL Shih <zackyl.shih@moxa.com>  Wed, 28 Oct 2015 13:46:02 +0800
+
 sanji-bundle-ethernet (0.9.10-1) unstable; urgency=low
 
   * Add "restart" for PUT response.

@@ -3,7 +3,6 @@
 
 import os
 import copy
-# import time
 import logging
 from sanji.core import Sanji
 from sanji.core import Route
@@ -11,10 +10,7 @@ from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
 from voluptuous import Optional, Extra
-# from voluptuous import Required
-# from voluptuous import All
 from voluptuous import In, Range, Any
-# from voluptuous import Length, In, Range
 import ip.addr as ip
 
 
@@ -143,7 +139,7 @@ class Ethernet(Sanji):
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
 
-    def read(self, id, restart=False, config=False):
+    def read(self, id, restart=False, config=True):
         """
         Read the setting for an interface.
 
@@ -168,7 +164,7 @@ class Ethernet(Sanji):
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving
-        if True == config:
+        if True is config:
             return data
 
         data["ip"] = ""
