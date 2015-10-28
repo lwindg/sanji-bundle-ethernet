@@ -9,6 +9,7 @@ from sanji.connection.mqtt import Mqtt
 
 
 REQ_RESOURCE = "/network/ethernets"
+MANUAL_TEST = 0
 
 
 class View(Sanji):
@@ -34,7 +35,8 @@ class View(Sanji):
                 print "GET collection is supported, should be code 200"
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 2: test GET with querying id
             sleep(2)
@@ -45,7 +47,8 @@ class View(Sanji):
                 print "GET by querying id is supported, should be code 200"
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 3: GET one interface
             sleep(2)
@@ -56,7 +59,8 @@ class View(Sanji):
                 print "GET is supported, should be code 200"
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 4: GET inexist interface
             sleep(2)
@@ -67,7 +71,8 @@ class View(Sanji):
                 print "Interface not found, should be code 404."
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 5: test PUT with no data attribute
             sleep(2)
@@ -77,7 +82,8 @@ class View(Sanji):
                 print "data is required, code 400 is expected"
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 6: test PUT with empty data
             sleep(2)
@@ -87,7 +93,8 @@ class View(Sanji):
                 print "data.enable is required, code 400 is expected"
                 print res.to_json()
                 self.stop()
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 7: test PUT with enable=0 for eth1
             sleep(2)
@@ -100,11 +107,20 @@ class View(Sanji):
                 print res.to_json()
                 self.stop()
             print data
-            var = raw_input("Please enter any key to continue...")
+            if 1 == MANUAL_TEST:
+                var = raw_input("Please enter any key to continue...")
 
             # case 8: test PUT with enable=1 for eth1
             sleep(2)
-            data = {"id": 2, "enable": 1}
+            data = {"id": 2, "enable": 1,
+                    "enableDhcp": 0,
+                    "enableDefaultGW": 1,
+                    "ip": "192.168.31.37",
+                    "netmask": "255.255.255.0",
+                    "subnet": "192.168.31.0",
+                    "gateway": "192.168.31.254",
+                    "dns": ["192.168.50.42"]}
+            # data = {"id": 2, "enable": 1, "enableDhcp": 1}
             resource = "%s/2" % REQ_RESOURCE
             print "PUT %s" % resource
             res = self.publish.put(resource, data=data)
@@ -113,8 +129,8 @@ class View(Sanji):
                 print res.to_json()
                 self.stop()
             print data
-            var = raw_input("Please enter any key to continue...")
-
+            if 1 == MANUAL_TEST:
+                print var
 
             # stop the test view
             self.stop()

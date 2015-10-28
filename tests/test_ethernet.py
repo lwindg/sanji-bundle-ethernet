@@ -58,172 +58,237 @@ class TestEthernetClass(unittest.TestCase):
         mock_interfaces.return_value = ["eth0", "eth1"]
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
 
-        self.ethernet = Ethernet(connection=Mockup())
-
-        # case 1: test init() function to load the default configuration
-        self.assertTrue(os.path.isfile("%s/data/ethernet.json" % dirpath))
-        self.assertTrue(os.path.isfile("%s/data/ethernet.backup.json" %
-                                       dirpath))
-
-        os.remove("%s/data/ethernet.json" % dirpath)
-        os.remove("%s/data/ethernet.backup.json" % dirpath)
+        self.name = "ethernet"
+        self.bundle = Ethernet(connection=Mockup())
 
     def tearDown(self):
-        self.ethernet.stop()
-        self.ethernet = None
+        self.bundle.stop()
+        self.bundle = None
+        try:
+            os.remove("%s/data/%s.json" % (dirpath, self.name))
+        except OSError:
+            pass
+
+        try:
+            os.remove("%s/data/%s.json.backup" % (dirpath, self.name))
+        except OSError:
+            pass
 
     @patch("ethernet.ip.interfaces")
-    def test_init(self, mock_interfaces):
-        # case 1: no interfaces
+    def test__init__no_iface(self, mock_interfaces):
+        """
+        init: no interface
+        """
         mock_interfaces.return_value = []
-        with self.assertRaises(ValueError):
-            self.ethernet.init()
 
-        # case 2: cannot load any configuration
-        mock_interfaces.return_value = ["eth0", "eth1"]
+        with self.assertRaises(ValueError):
+            self.bundle.init()
+
+    @patch("ethernet.ip.interfaces")
+    def test__init__no_conf(self, mock_interfaces):
+        """
+        init: no configuration file
+        """
+        mock_interfaces.return_value = ["eth0"]
+
         with self.assertRaises(IOError):
             with patch("ethernet.ModelInitiator") as mock_modelinit:
                 mock_modelinit.side_effect = IOError
-                self.ethernet.init()
+                self.bundle.init()
 
-    @patch("ethernet.ip.ifupdown")
-    @patch("ethernet.ip.ifconfig")
     @patch("ethernet.ip.ifaddresses")
-    def test_load(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
-        # Setup the mock
-        ifaces = ["eth0", "eth1"]
+    def test__load__current_conf(self, mock_ifaddresses):
+        """
+        load: current configuration file
+        """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
 
-        # case 1: load current configuration
-        self.ethernet.load(dirpath, ifaces)
-        self.assertEqual(2, len(self.ethernet.model.db))
-        for iface in self.ethernet.model.db:
+        ifaces = ["eth0", "eth1"]
+        self.bundle.load(dirpath, ifaces)
+        self.assertEqual(2, len(self.bundle.model.db))
+        for iface in self.bundle.model.db:
             ifname = "eth%d" % (iface["id"]-1)
             self.assertTrue(ifname in ifaces)
 
-        os.remove("%s/data/ethernet.json" % dirpath)
+    @patch("ethernet.ip.ifaddresses")
+    def test__load__backup_conf(self, mock_ifaddresses):
+        """
+        load: backup configuration file
+        """
+        mock_ifaddresses.side_effect = mock_ip_ifaddresses
+        os.remove("%s/data/%s.json" % (dirpath, self.name))
 
-        # case 3: load backup configuration
-        self.ethernet.load(dirpath, ifaces)
-        self.assertEqual(2, len(self.ethernet.model.db))
+        ifaces = ["eth0", "eth1"]
+        self.bundle.load(dirpath, ifaces)
+        self.assertEqual(2, len(self.bundle.model.db))
 
-        os.remove("%s/data/ethernet.json" % dirpath)
-        os.remove("%s/data/ethernet.backup.json" % dirpath)
+    def test__load__no_conf(self):
+        """
+        load: no configuration file
+        """
+        # case: cannot load any configuration
+        with self.assertRaises(Exception):
+            self.bundle.load("%s/mock" % dirpath, [])
 
-        # case 4: cannot load any configuration
-        with self.assertRaises(IOError):
-            self.ethernet.load("%s/mock" % dirpath, ifaces)
-
-    def test_save(self):
+    def test__save(self):
+        """
+        save: tested in init()
+        """
         # Already tested in init()
         pass
 
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
-    def test_apply(self, mock_ifconfig, mock_ifupdown):
+    def test__apply__iface_down(self, mock_ifconfig, mock_ifupdown):
+        """
+        apply: set the interface to "down"
+        """
         # TODO: how to determine if setting success
-        # case 1: set the interface to "down"
         data = {
             "id": 1,
             "enable": 0
         }
-        self.ethernet.apply(data)
+        self.bundle.apply(data)
 
-        data["enable"] = 1
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    def test__apply__iface_up_static(self, mock_ifconfig, mock_ifupdown):
+        """
+        apply: set the interface to "up" with static IP
+        """
+        # TODO: how to determine if setting success
+        data = {
+            "id": 1,
+            "enable": 1,
+            "enableDhcp": 0,
+            "ip": "192.168.31.39",
+            "netmask": "255.255.255.0",
+            "gateway": "192.168.31.254"
+        }
+        self.bundle.apply(data)
 
-        # case 2: set the interface to "up" with dhcp enabled
-        data["enableDhcp"] = 1
-        self.ethernet.apply(data)
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    def test__apply__iface_up_dhcp(self, mock_ifconfig, mock_ifupdown):
+        """
+        apply: set the interface to "up" with dhcp enabled
+        """
+        # TODO: how to determine if setting success
+        data = {
+            "id": 1,
+            "enable": 1,
+            "enableDhcp": 1
+        }
+        self.bundle.apply(data)
 
-        # case 3: set the interface to "up" with static IP
-        data["enableDhcp"] = 0
-        data["ip"] = "192.168.31.39"
-        data["netmask"] = "255.255.255.0"
-        data["gateway"] = "192.168.31.254"
-        self.ethernet.apply(data)
-
-        # case 4: set an unknown interface
-        data["id"] = 0
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    def test__apply__iface_unknown(self, mock_ifconfig, mock_ifupdown):
+        """
+        apply: set an unknown interface
+        """
+        data = {
+            "id": 0,
+            "enable": 1
+        }
         with self.assertRaises(ValueError):
             mock_ifupdown.side_effect = ValueError
             mock_ifconfig.side_effect = ValueError
-            self.ethernet.apply(data)
+            self.bundle.apply(data)
 
     @patch("ethernet.ip.ifaddresses")
-    def test_read(self, mock_ifaddresses):
+    def test__read(self, mock_ifaddresses):
+        """
+        read: read current status and mac
+        """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
 
-        # case 1: read current status and mac
-        data = self.ethernet.read(1)
+        data = self.bundle.read(1)
         self.assertEqual(1, data["currentStatus"])
         self.assertEqual("78:ac:c0:c1:a8:fe", data["mac"])
 
-        # case 2: no such interface
-        data = self.ethernet.read(3)
+    @patch("ethernet.ip.ifaddresses")
+    def test__read__unknown_iface(self, mock_ifaddresses):
+        """
+        read: no such interface
+        """
+        mock_ifaddresses.side_effect = mock_ip_ifaddresses
+
+        data = self.bundle.read(3)
         self.assertEqual(None, data)
-        data = self.ethernet.read(0)
+        data = self.bundle.read(0)
         self.assertEqual(None, data)
 
     @patch("ethernet.ip.ifaddresses")
-    def test_get(self, mock_ifaddresses):
+    def test__get__collection(self, mock_ifaddresses):
         """
-        collection: /network/ethernets
+        get (/network/ethernets): collection
         """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
         message = Message({"data": {}, "query": {}, "param": {}})
 
-        '''remove capability function
-        # case 1: capability
-        def resp1(code=200, data=None):
-            self.assertEqual(200, code)
-            self.assertEqual(data, [1, 2])
-        self.ethernet.get(message=message, response=resp1, test=True)
-        '''
-
-        # case 2: collection
-        def resp2(code=200, data=None):
+        # case: collection
+        def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, len(data))
-        self.ethernet.get(message=message, response=resp2, test=True)
+        self.bundle.get(message=message, response=resp, test=True)
 
-        # case 3: id
-        def resp3(code=200, data=None):
+    @patch("ethernet.ip.ifaddresses")
+    def test__get__by_id(self, mock_ifaddresses):
+        """
+        get (/network/ethernets?id=2)
+        """
+        mock_ifaddresses.side_effect = mock_ip_ifaddresses
+        message = Message({"data": {}, "query": {}, "param": {}})
+
+        # case: by id
+        def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, data["id"])
             self.assertEqual(0, data["currentStatus"])
             self.assertEqual("78:ac:c0:c1:a8:ff", data["mac"])
         message.query["id"] = 2
-        self.ethernet.get(message=message, response=resp3, test=True)
+        self.bundle.get(message=message, response=resp, test=True)
 
     @patch("ethernet.ip.ifaddresses")
-    def test_get_by_id(self, mock_ifaddresses):
+    def test__get_by_id(self, mock_ifaddresses):
         """
-        /network/ethernets/1
+        get_by_id (/network/ethernets/1)
         """
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
         message = Message({"data": {}, "query": {}, "param": {}})
 
-        # case 1: get an interface successfully
-        def resp1(code=200, data=None):
+        # case: get an interface successfully
+        def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(1, data["id"])
             self.assertEqual(1, data["currentStatus"])
             self.assertEqual("78:ac:c0:c1:a8:fe", data["mac"])
         message.param["id"] = 1
-        self.ethernet.get_by_id(message=message, response=resp1, test=True)
+        self.bundle.get_by_id(message=message, response=resp, test=True)
 
-        # case 2: no such interface
-        def resp2(code=200, data=None):
+    @patch("ethernet.ip.ifaddresses")
+    def test__get_by_id__unknown_iface(self, mock_ifaddresses):
+        """
+        get_by_id (/network/ethernets/3): unknown interface
+        """
+        mock_ifaddresses.side_effect = mock_ip_ifaddresses
+        message = Message({"data": {}, "query": {}, "param": {}})
+
+        # case: get an interface successfully
+        def resp(code=200, data=None):
             self.assertEqual(404, code)
             self.assertEqual(data, {"message": "No such device."})
         message.param["id"] = 3
-        self.ethernet.get_by_id(message=message, response=resp2, test=True)
+        self.bundle.get_by_id(message=message, response=resp, test=True)
 
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
-    def test_put(self, mock_ifconfig, mock_ifupdown):
+    @patch("ethernet.ip.ifaddresses")
+    def test__put__no_data(self, mock_ifaddresses, mock_ifconfig,
+                           mock_ifupdown):
         """
-        bulk put: /network/ethernets
+        put (/network/ethernets): no data attribute
         "data": [
             {
                 "id": 1,
@@ -237,57 +302,169 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"query": {}, "param": {}})
 
-        # case 1: no data attribute
-        def resp1(code=200, data=None):
+        # case: no data attribute
+        def resp(code=200, data=None):
             self.assertEqual(400, code)
-        self.ethernet.put(message, response=resp1, test=True)
+        self.bundle.put(message, response=resp, test=True)
 
-        # case 1: invalid json schema
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put__invalid_json(self, mock_ifaddresses, mock_ifconfig,
+                                mock_ifupdown):
+        """
+        put (/network/ethernets): invalid json schema
+        "data": [
+            {
+                "id": 1,
+                ...
+            },
+            {
+                "id": 2,
+                ...
+            }
+        ]
+        """
+        # case: invalid json schema
+
+        def resp(code=200, data=None):
+            self.assertEqual(400, code)
         message = Message({"data": {}, "query": {}, "param": {}})
-        self.ethernet.put(message, response=resp1, test=True)
+        self.bundle.put(message, response=resp, test=True)
 
         message = Message({"data": [], "query": {}, "param": {}})
-        self.ethernet.put(message, response=resp1, test=True)
+        self.bundle.put(message, response=resp, test=True)
 
         message.data.append({"id": 0, "enable": 1})
-        self.ethernet.put(message, response=resp1, test=True)
+        self.bundle.put(message, response=resp, test=True)
 
-        # case 2: one interface is not exist (bulk); exist one will be updated
+    # @patch("ethernet.time.sleep")
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put__partial_success(self, mock_ifaddresses, mock_ifconfig,
+                                   mock_ifupdown):
+        """
+        put (/network/ethernets): one interface is not exist
+        "data": [
+            {
+                "id": 1,
+                ...
+            },
+            {
+                "id": 2,
+                ...
+            }
+        ]
+        """
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+        self.bundle.publish.event.put = mock_put
+
+        # case: one interface is not exist (bulk); exist one will be updated
         message = Message({"data": [], "query": {}, "param": {}})
 
-        def resp2(code=200, data=None):
-            self.assertEqual(400, code)
-        message.data.append({"id": 1, "enable": 1, "ip": "192.168.31.36"})
+        # always true for response reply before apply the settings
+        def resp(code=200, data=None):
+            self.assertEqual(200, code)
+        message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.36"})
         message.data.append({"id": 3, "enable": 1})
-        self.ethernet.put(message, response=resp2, test=True)
-        data = self.ethernet.read(1)
+        self.bundle.put(message, response=resp, test=True)
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.36", data["ip"])
 
-        # case 3: all interfaces are not exist (bulk)
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put__unknown_ifaces(self, mock_ifaddresses, mock_ifconfig,
+                                  mock_ifupdown):
+        """
+        put (/network/ethernets): all interfaces are not exist
+        "data": [
+            {
+                "id": 1,
+                ...
+            },
+            {
+                "id": 2,
+                ...
+            }
+        ]
+        """
         message = Message({"data": [], "query": {}, "param": {}})
 
-        def resp3(code=200, data=None):
+        def resp(code=200, data=None):
             self.assertEqual(400, code)
         message.data.append({"id": 0, "enable": 1})
         message.data.append({"id": 3, "enable": 1})
-        self.ethernet.put(message, response=resp3, test=True)
+        self.bundle.put(message, response=resp, test=True)
 
-        # case 4: put successfully (bulk)
+    # @patch("ethernet.time.sleep")
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+        """
+        put (/network/ethernets)
+        "data": [
+            {
+                "id": 1,
+                ...
+            },
+            {
+                "id": 2,
+                ...
+            }
+        ]
+        """
         message = Message({"data": [], "query": {}, "param": {}})
 
-        def resp4(code=200, data=None):
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
+        def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, len(data))
-        message.data.append({"id": 1, "enable": 1, "ip": "192.168.31.37"})
-        message.data.append({"id": 2, "enable": 1, "ip": "192.168.41.37"})
-        self.ethernet.put(message, response=resp4, test=True)
-        data = self.ethernet.read(1)
+        message.data.append({"id": 1, "enable": 1, "ip": u"192.168.31.37"})
+        message.data.append({"id": 2, "enable": 1, "ip": u"192.168.41.37"})
+
+        def mock_event_put(resource, data):
+            pass
+        self.bundle.publish.event.put = mock_event_put
+        self.bundle.put(message, response=resp, test=True)
+
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.37", data["ip"])
-        data = self.ethernet.read(2)
+        data = self.bundle.read(2, config=True)
         self.assertEqual("192.168.41.37", data["ip"])
 
-        # case 5: put by id (fully test in test_put_by_id())
-        def resp5(code=200, data=None):
+    # @patch("ethernet.time.sleep")
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put__by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+        """
+        put (/network/ethernets): by id
+        "data": [
+            {
+                "id": 1,
+                ...
+            },
+            {
+                "id": 2,
+                ...
+            }
+        ]
+        """
+        message = Message({"data": [], "query": {}, "param": {}})
+
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
+        def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(1, data["enable"])
             self.assertEqual("192.168.31.39", data["ip"])
@@ -295,51 +472,91 @@ class TestEthernetClass(unittest.TestCase):
         message.param["id"] = 1
         message.data["id"] = 1
         message.data["enable"] = 1
-        message.data["ip"] = "192.168.31.39"
-        self.ethernet.put(message, response=resp5, test=True)
+        message.data["ip"] = u"192.168.31.39"
 
+        def mock_event_put(resource, data):
+            pass
+        self.bundle.publish.event.put = mock_event_put
+        self.bundle.put(message, response=resp, test=True)
+
+    # @patch("ethernet.time.sleep")
     @patch("ethernet.ip.ifupdown")
     @patch("ethernet.ip.ifconfig")
-    def test_put_by_id(self, mock_ifconfig, mock_ifupdown):
+    @patch("ethernet.ip.ifaddresses")
+    def test__put_by_id__invalid_json(self, mock_ifaddresses, mock_ifconfig,
+                                      mock_ifupdown):
         """
-        /network/ethernets/1
+        put_by_id (/network/ethernets/1): invalid json schema
         "data": {
             "id": 1,
             ...
         }
         """
-        # case 1: invalid json schema
         message = Message({"query": {}, "param": {}})
 
         # no data attribute, other case already tested in "test_put()"
-        def resp1(code=200, data=None):
+        def resp(code=200, data=None):
             self.assertEqual(400, code)
-        self.ethernet.put_by_id(message, response=resp1, test=True)
+        self.bundle.put_by_id(message, response=resp, test=True)
 
-        # case 2: no such interface
+    # @patch("ethernet.time.sleep")
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put_by_id__unknown_iface(self, mock_ifaddresses, mock_ifconfig,
+                                       mock_ifupdown):
+        """
+        put_by_id (/network/ethernets/3): unknown interface
+        "data": {
+            "id": 1,
+            ...
+        }
+        """
         message = Message({"data": {}, "query": {}, "param": {}})
 
-        def resp2(code=200, data=None):
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
+        def resp(code=200, data=None):
             self.assertEqual(404, code)
         message.data["id"] = 3
         message.data["enable"] = 0
-        message.data["ip"] = "192.168.31.37"
-        self.ethernet.put_by_id(message, response=resp2, test=True)
+        message.data["ip"] = u"192.168.31.37"
+        self.bundle.put_by_id(message, response=resp, test=True)
 
-        # case 3: put successfully
-        def resp3(code=200, data=None):
+    # @patch("ethernet.time.sleep")
+    @patch("ethernet.ip.ifupdown")
+    @patch("ethernet.ip.ifconfig")
+    @patch("ethernet.ip.ifaddresses")
+    def test__put_by_id(self, mock_ifaddresses, mock_ifconfig, mock_ifupdown):
+        """
+        put_by_id (/network/ethernets/1)
+        "data": {
+            "id": 1,
+            ...
+        }
+        """
+        message = Message({"data": {}, "query": {}, "param": {}})
+
+        def mock_put(resource, data):
+            pass
+        self.bundle.publish.put = mock_put
+
+        def resp(code=200, data=None):
             self.assertEqual(404, code)
         message.data["id"] = 1
         message.data["enable"] = 0
-        message.data["ip"] = "192.168.31.40"
-        self.ethernet.put_by_id(message, response=resp3, test=True)
-        data = self.ethernet.read(1)
+        message.data["ip"] = u"192.168.31.40"
+        self.bundle.put_by_id(message, response=resp, test=True)
+        data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.40", data["ip"])
 
-    def test_put_dhcp_info(self):
+    def test__put_dhcp_info__invalid_json(self):
         """
-        /network/ethernets/1/dhcp
+        put_dhcp_info (/network/interface/dhcp): invalid json schema
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -349,34 +566,56 @@ class TestEthernetClass(unittest.TestCase):
         """
         message = Message({"query": {}, "param": {}})
 
-        # case 1: invalid json schema
-        def resp1(code=200, data=None):
-            self.assertEqual(400, code)
-        self.ethernet.put_dhcp_info(message, response=resp1, test=True)
+        with self.assertRaises(ValueError):
+            self.bundle.put_dhcp_info(message, test=True)
 
-        # case 2: no such interface
-        def resp2(code=200, data=None):
-            self.assertEqual(404, code)
-
+    def test__put_dhcp_info__unknown_iface(self):
+        """
+        put_dhcp_info (/network/interface/dhcp): unknown interface
+        "data": {
+            "name": "",
+            "ip": "",
+            "netmask": "",
+            "subnet": "",
+            "dns": [],
+            "gateway": ""
+        }
+        """
         message = Message({"data": {}, "query": {}, "param": {}})
-        message.param["id"] = 3
+        message.data["name"] = "eth2"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
-        self.ethernet.put_dhcp_info(message, response=resp2, test=True)
+        with self.assertRaises(ValueError):
+            self.bundle.put_dhcp_info(message, test=True)
 
-        # case 3: put successfully
-        def resp3(code=200, data=None):
-            self.assertEqual(200, code)
-
+    @patch("ethernet.ip.ifaddresses")
+    def test__put_dhcp_info(self, mock_ifaddresses):
+        """
+        put_dhcp_info (/network/interface/dhcp)
+        "data": {
+            "name": "",
+            "ip": "",
+            "netmask": "",
+            "subnet": "",
+            "dns": [],
+            "gateway": ""
+        }
+        """
         message = Message({"data": {}, "query": {}, "param": {}})
-        message.param["id"] = 1
+        message.data["name"] = "eth1"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
-        self.ethernet.put_dhcp_info(message, response=resp3, test=True)
+        self.bundle.put_dhcp_info(message, test=True)
+
+        data = self.bundle.read(2, config=True)
+        self.assertEqual("192.168.41.3", data["ip"])
+        self.assertEqual("255.255.255.0", data["netmask"])
+        self.assertEqual("192.168.41.254", data["gateway"])
+        self.assertEqual(["8.8.8.8"], data["dns"])
 
 
 if __name__ == "__main__":

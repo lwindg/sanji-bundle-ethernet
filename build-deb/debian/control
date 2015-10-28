@@ -1,0 +1,18 @@
+Source: sanji-bundle-ethernet
+Priority: extra
+Maintainer: Aeluin Chen <aeluin.chen@moxa.com>
+Build-Depends: debhelper (>= 8.0.0)
+Build-Depends-Indep: python (>= 2.7)
+Standards-Version: 3.9.3
+Section: libs
+Homepage: http://www.moxa.com
+#Vcs-Git: git@github.com:lwindg/sanji-ethernet.git
+#Vcs-Browser: https://github.com/lwindg/sanji-ethernet
+X-Python-Version: >= 2.5
+
+Package: sanji-bundle-ethernet
+Section: libs
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, python2.7, python-pip, python-dev, ipcalc
+Description: A sanji library for configure the Ethernet interfaces.
+

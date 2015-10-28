@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import sys
-import subprocess
+# import subprocess
+import sh
 import getopt
 import json
-from random import randint
+# from random import randint
 
 
-DHCP_RES = "/network/ethernet/:iface/dhcp"
+DHCP_RES = "/network/interface/dhcp"
+IFACE_RES = "/network/interface"
+
 if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(
@@ -17,6 +20,7 @@ if __name__ == "__main__":
         exit(-1)
 
     data = {
+        "code": 200,
         "method": "put",
         "resource": DHCP_RES,
         "data": {
@@ -25,8 +29,7 @@ if __name__ == "__main__":
 
     for opt, arg in opts:
         if opt == "-i":
-            iface = int(arg.replace("eth", "")) + 1
-            data["resource"] = DHCP_RES.replace(":iface", str(iface))
+            data["data"]["name"] = arg
         elif opt == "--ip":
             data["data"]["ip"] = arg
         elif opt == "--netmask":
@@ -36,20 +39,26 @@ if __name__ == "__main__":
         elif opt == "--gateway":
             data["data"]["gateway"] = arg
         elif opt == "--dns":
-            data["data"]["dns"] = arg
+            data["data"]["dns"] = arg.split()
 
-    # send event to view
+    # send event to ethernet
+    data["resource"] = DHCP_RES
+    sh.mosquitto_pub("-t", "/controller", "-m", json.dumps(data, indent=2))
+    '''
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",
          "-m", "%s" % json.dumps(data, indent=2)],
         stdout=subprocess.PIPE)
+    '''
 
-    # send request to model
-    data["id"] = randint(10000, 99999999)
-    data["tunnel"] = "ethernet-dhcp-updater"
+    # send event to views
+    data["resource"] = IFACE_RES
+    sh.mosquitto_pub("-t", "/controller", "-m", json.dumps(data, indent=2))
+    '''
     subprocess.Popen(
         ["mosquitto_pub",
          "-t", "/controller",
          "-m", "%s" % json.dumps(data, indent=2)],
         stdout=subprocess.PIPE)
+    '''

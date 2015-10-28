@@ -3,6 +3,7 @@
 
 import os
 import copy
+# import time
 import logging
 from sanji.core import Sanji
 from sanji.core import Route
@@ -12,13 +13,13 @@ from voluptuous import Schema
 from voluptuous import Optional, Extra
 # from voluptuous import Required
 # from voluptuous import All
-from voluptuous import In, Range
+from voluptuous import In, Range, Any
 # from voluptuous import Length, In, Range
-import ip
+import ip.addr as ip
 
 
-# TODO: logger should be defined in sanji package?
-logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO)
+_logger = logging.getLogger("sanji.ethernet")
 
 
 def merge(dest, src, path=None):
@@ -52,20 +53,20 @@ class Ethernet(Sanji):
         except KeyError:
             bundle_env = os.getenv("BUNDLE_ENV", "debug")
 
-        path_root = os.path.abspath(os.path.dirname(__file__))
+        self.path_root = os.path.abspath(os.path.dirname(__file__))
         if bundle_env == "debug":  # pragma: no cover
-            path_root = "%s/tests" % path_root
+            self.path_root = "%s/tests" % self.path_root
 
         # Find all ethernet interfaces and load the configuration
         ifaces = ip.interfaces()
         ifaces = [x for x in ifaces if x.startswith("eth")]
         if 0 == len(ifaces):
-            logger.info("No interfaces to be configured.")
+            _logger.info("No interfaces to be configured.")
             self.stop()
             raise ValueError("No interfaces to be configured.")
 
         try:
-            self.load(path_root, ifaces)
+            self.load(self.path_root, ifaces)
         except:
             self.stop()
             raise IOError("Cannot load any configuration.")
@@ -73,6 +74,10 @@ class Ethernet(Sanji):
         # Apply the configuration
         for iface in self.model.db:
             self.apply(iface)
+
+    def run(self):
+        for iface in self.model.db:
+            self.publish.event.put("/network/interface", data=iface)
 
     def load(self, path, ifaces):
         """
@@ -89,15 +94,15 @@ class Ethernet(Sanji):
             raise IOError("Cannot load any configuration.")
 
         # Initialise the interfaces
-        # TODO: 1. type is always "WAN" for CS
-        #       2. 1st iface's type is "LAN" with dhcp server; another is "WAN"
+        # TODO: 2nd iface's type is "LAN"; another is "WAN"
         if 1 == len(self.model.db) and "id" not in self.model.db[0]:
-            print "factory install"
+            _logger.debug("factory install")
             default_db = self.model.db.pop()
             ip_3_def = int(default_db["ip"].split(".")[2]) - 1
             for iface in ifaces:
                 ifaddr = ip.ifaddresses(iface)
                 db = copy.deepcopy(default_db)
+                db["name"] = iface
                 db["id"] = int(iface.replace("eth", "")) + 1
 
                 ip_3 = ip_3_def + db["id"]
@@ -132,12 +137,13 @@ class Ethernet(Sanji):
             return
 
         if data["enableDhcp"]:
-            ip.ifconfig(iface, True)
+            ip.ifconfig(iface, True, script="%s/hooks/dhclient-script" %
+                        self.path_root)
         else:
             ip.ifconfig(iface, False, data["ip"], data["netmask"],
                         data["gateway"])
 
-    def read(self, id):
+    def read(self, id, restart=False, config=False):
         """
         Read the setting for an interface.
 
@@ -150,23 +156,38 @@ class Ethernet(Sanji):
         else:
             return None
 
+        # deepcopy to prevent settings be modified
+        data = copy.deepcopy(data)
+
+        if not restart and "restart" in data:
+            data.pop("restart")
+
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
         data["currentStatus"] = ifaddr["link"]
         data["mac"] = ifaddr["mac"]
 
-        """Use configuration data instead of realtime retrieving
-        data["ip"] = ifaddr["inet"][0]["ip"]
-        data["netmask"] = ifaddr["inet"][0]["netmask"]
-        if "subnet" in ifaddr["inet"][0]:
-            data["subnet"] = ifaddr["inet"][0]["subnet"]
-        else:
-            data.pop("subnet")
-        if "broadcast" in ifaddr["inet"][0]:
-            data["broadcast"] = ifaddr["inet"][0]["broadcast"]
-        else:
-            data.pop("broadcast")
-        """
+        # """Use configuration data instead of realtime retrieving
+        if True == config:
+            return data
+
+        data["ip"] = ""
+        data["netmask"] = ""
+        data["subnet"] = ""
+        data["broadcast"] = ""
+        # data["gateway"] = ""
+        if ifaddr["inet"] and len(ifaddr["inet"]):
+            data["ip"] = ifaddr["inet"][0]["ip"]
+            data["netmask"] = ifaddr["inet"][0]["netmask"]
+            if "subnet" in ifaddr["inet"][0]:
+                data["subnet"] = ifaddr["inet"][0]["subnet"]
+            else:
+                data.pop("subnet")
+            if "broadcast" in ifaddr["inet"][0]:
+                data["broadcast"] = ifaddr["inet"][0]["broadcast"]
+            elif "broadcast" in data:
+                data.pop("broadcast")
+        # """
         return data
 
     @staticmethod
@@ -178,14 +199,13 @@ class Ethernet(Sanji):
         schema = Schema({
             "id": Range(min=1),
             "enable": In(frozenset([0, 1])),
-            Optional("type"): In(frozenset([0, 1])),
+            Optional("wan"): In(frozenset([0, 1])),
             Optional("enableDhcp"): In(frozenset([0, 1])),
-            Optional("enableDefaultGW"): In(frozenset([0, 1])),
-            Optional("ip"): str,
-            Optional("netmask"): str,
-            Optional("subnet"): str,
-            Optional("gateway"): str,
-            Optional("dns"): list,
+            Optional("ip"): Any(str, unicode),
+            Optional("netmask"): Any(str, unicode),
+            Optional("subnet"): Any(str, unicode),
+            Optional("gateway"): Any(str, unicode),
+            Optional("dns"): [Any(str, unicode)],
             Extra: object
         }, required=True)
 
@@ -234,6 +254,7 @@ class Ethernet(Sanji):
             data = self.read(iface["id"])
             if data:
                 collection.append(data)
+        collection = sorted(collection, key=lambda k: k["id"])
         return response(data=collection)
 
         '''capability function removed
@@ -274,15 +295,34 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
+            _logger.debug(e, exc_info=True)
             return response(code=400,
                             data={"message": e.message})
 
         try:
             info = self.merge_info(message.data)
+            resp = copy.deepcopy(info)
+
+            restart = 0
+            if "restart" in info:
+                restart = info["restart"]
+
+            current = self.read(info["id"])
+            if restart == 1 and current["ip"] != info["ip"]:
+                resp["restart"] = 1
+            else:
+                resp["restart"] = 0
+
+            if 1 == resp["restart"]:
+                response(data=resp)
+
             self.apply(info)
-            self.model.save_db()
-            self.model.backup_db()
-            return response(data=info)
+            self.save()
+            self.publish.event.put("/network/interface", data=info)
+
+            if 0 == resp["restart"]:
+                # time.sleep(2)
+                return response(data=resp)
         except Exception, e:
             return response(code=404, data={"message": e.message})
 
@@ -308,24 +348,32 @@ class Ethernet(Sanji):
         try:
             self.schema_validate(message)
         except Exception, e:
+            _logger.debug(e, exc_info=True)
             return response(code=400,
                             data={"message": e.message})
 
         if "id" in message.param:
             return self._put_by_id(message=message, response=response)
 
-        error = None
+        response(data=message.data)
+
+        # error = None
         for iface in message.data:
             try:
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
+                self.publish.event.put("/network/interface", data=info)
             except Exception, e:
-                error = e.message
+                # error = e.message
+                pass
         self.model.backup_db()
+        '''
+        time.sleep(2)
         if error:
             return response(code=400, data={"message": error})
         return response(data=self.model.db)
+        '''
 
     @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
@@ -339,20 +387,22 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
-        "ip": str,
-        "netmask": str,
-        Optional("subnet"): str,
-        "gateway": str,
-        "dns": list,
+        "name": Any(str, unicode),
+        "ip": Any(str, unicode),
+        "netmask": Any(str, unicode),
+        Optional("subnet"): Any(str, unicode),
+        "gateway": Any(str, unicode),
+        "dns": [Any(str, unicode)],
         Extra: object
     }, required=True)
 
-    @Route(methods="put", resource="/network/ethernets/:id/dhcp",
+    @Route(methods="put", resource="/network/interface/dhcp",
            schema=put_dhcp_schema)
-    def put_dhcp_info(self, message, response):
+    def put_dhcp_info(self, message):
         """
-        /network/ethernets/1/dhcp
+        /network/interface/dhcp
         "data": {
+            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -360,23 +410,26 @@ class Ethernet(Sanji):
             "gateway": ""
         }
         """
+        # TODO: should be removed when schema worked for unittest
         if not hasattr(message, "data"):
-            return response(code=400,
-                            data={"message": "Invalid input."})
+            raise ValueError("Invalid input.")
 
-        message.data["id"] = message.param["id"]
+        if "name" not in message.data or "eth" not in message.data["name"]:
+            return
+
+        message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
         try:
-            info = self.merge_info(message.data)
+            self.merge_info(message.data)
+            _logger.debug(self.model.db)
             self.model.save_db()
-            return response(data=info)
         except Exception, e:
-            return response(code=404, data={"message": e.message})
+            raise ValueError("Invalid input: %s.", str(e))
 
 
 if __name__ == "__main__":
     FORMAT = "%(asctime)s - %(levelname)s - %(lineno)s - %(message)s"
     logging.basicConfig(level=0, format=FORMAT)
-    logger = logging.getLogger("Ethernet")
+    _logger = logging.getLogger("sanji.ethernet")
 
     ethernet = Ethernet(connection=Mqtt())
     ethernet.start()
