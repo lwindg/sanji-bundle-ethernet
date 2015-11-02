@@ -1,6 +1,6 @@
 {
   "name": "ethernet",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "author": "Aeluin Chen",
   "email": "aeluin.chen@moxa.com",
   "description": "Handle the Ethernet interfaces",
