@@ -303,7 +303,7 @@ class Ethernet(Sanji):
             if "restart" in info:
                 restart = info["restart"]
 
-            current = self.read(info["id"])
+            current = self.read(info["id"], config=False)
             if restart == 1 and current["ip"] != info["ip"]:
                 resp["restart"] = 1
             else:
