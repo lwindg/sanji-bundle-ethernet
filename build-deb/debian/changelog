@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.9.13-1) unstable; urgency=low
+
+  * Add timeout to `grep` for preventing input without EOF.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 05 Nov 2015 11:20:17 +0800
+
 sanji-bundle-ethernet (0.9.12-1) unstable; urgency=low
 
   * Bugfix: change default read cause wrong comparison while update IP
