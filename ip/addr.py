@@ -76,12 +76,12 @@ def ifaddresses(iface):
     try:
         info["link"] = open("/sys/class/net/%s/operstate" % iface).read()
         if "down" == info["link"][:-1]:
-            info["link"] = 0
+            info["link"] = False
         else:
             info["link"] = open("/sys/class/net/%s/carrier" % iface).read()
-            info["link"] = int(info["link"][:-1])  # convert to int
+            info["link"] = True if int(info["link"][:-1]) == 1 else False
     except:
-        info["link"] = 0
+        info["link"] = False
 
     info["inet"] = []
     if netifaces.AF_INET not in full:

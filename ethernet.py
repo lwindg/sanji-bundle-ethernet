@@ -9,8 +9,7 @@ from sanji.core import Route
 from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
-from voluptuous import Optional, Extra
-from voluptuous import In, Range, Any
+from voluptuous import Optional, Extra, Range, Any
 import ip.addr as ip
 
 
@@ -194,9 +193,9 @@ class Ethernet(Sanji):
         # TODO: ip validation
         schema = Schema({
             "id": Range(min=1),
-            "enable": In(frozenset([0, 1])),
-            Optional("wan"): In(frozenset([0, 1])),
-            Optional("enableDhcp"): In(frozenset([0, 1])),
+            "enable": bool,
+            Optional("wan"): bool,
+            Optional("enableDhcp"): bool,
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
             Optional("subnet"): Any(str, unicode),
@@ -299,24 +298,24 @@ class Ethernet(Sanji):
             info = self.merge_info(message.data)
             resp = copy.deepcopy(info)
 
-            restart = 0
+            restart = False
             if "restart" in info:
                 restart = info["restart"]
 
             current = self.read(info["id"], config=False)
-            if restart == 1 and current["ip"] != info["ip"]:
-                resp["restart"] = 1
+            if restart is True and current["ip"] != info["ip"]:
+                resp["restart"] = True
             else:
-                resp["restart"] = 0
+                resp["restart"] = False
 
-            if 1 == resp["restart"]:
+            if resp["restart"] is True:
                 response(data=resp)
 
             self.apply(info)
             self.save()
             self.publish.event.put("/network/interface", data=info)
 
-            if 0 == resp["restart"]:
+            if resp["restart"] is False:
                 # time.sleep(2)
                 return response(data=resp)
         except Exception, e:
