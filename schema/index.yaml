@@ -1,0 +1,203 @@
+swagger: '2.0'
+info:
+  title: Ethernet API
+  description: Handle the Ethernet interface(s)
+  version: "0.9.14"
+
+schemes:
+  - http
+  - https
+produces:
+  - application/json
+paths:
+  /network/ethernets:
+    get:
+      summary: Ethernet Interface(s)
+      description: |
+        The system returns information about the settings of all
+        *Ethernet interface(s)*.
+      responses:
+        200:
+          description: An array of Ethernet interface(s)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Ethernet'
+          examples:
+            {
+              "application/json": {
+                $ref: '#/externalDocs/x-mocks/Ethernets'
+              }
+            }
+    put:
+      summary: Ethernet Interface(s)
+      description: Update a list of Ethernet interface(s) settings.
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Ethernet'
+
+  /network/ethernets/{id}:
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    get:
+      description: |
+        Get settings of indicated Ethernet interface.
+      responses:
+        200:
+          description: An Ethernet interface settings.
+          schema:
+            $ref: '#/definitions/Ethernet'
+          examples:
+            {
+              "application/json": {
+                $ref: '#/externalDocs/x-mocks/Ethernet'
+              }
+            }
+    put:
+      summary: Ethernet Interface
+      description: Update an Ethernet interface settings.
+      parameters:
+      - name: body
+        in: body
+        description: ''
+        required: true
+        schema:
+          $ref: '#/definitions/Ethernet'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Ethernet'
+          examples:
+            {
+              "application/json": {
+                $ref: '#/externalDocs/x-mocks/Ethernet'
+              }
+            }
+
+definitions:
+  Ethernet:
+    title: Ethernet
+    required:
+      - id
+      - enable
+      - enableDhcp
+    properties:
+      id:
+        type: integer
+        description: Identifier of an Ethernet interface.
+      enable:
+        type: boolean
+        description: Set interface UP.
+      wan:
+        type: boolean
+        description: Define the interface type is WAN (`1`) or LAN (`0`)
+      name:
+        type: string
+        readOnly: true
+        description: Indicate the interface name.
+      enableDhcp:
+        type: boolean
+        description: Enable (`1`) the dhcp client or using the static IP (`0`).
+      ip:
+        type: string
+        pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        description: IP address for the Ethernet interface.
+      mac:
+        type: string
+        readOnly: true
+        description: The identical MAC address.
+      netmask:
+        type: string
+        pattern: ^(254|252|248|240|224|192|128)\.0\.0\.0|255\.(254|252|248|240|224|192|128|0)\.0\.0|255\.255\.(254|252|248|240|224|192|128|0)\.0|255\.255\.255\.(254|252|248|240|224|192|128|0)
+        description: Subnet mask for the Ethernet interface.
+      subnet:
+        type: string
+        pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        description: |
+          A subnet (short for "subnetwork") is an identifiably separate part of
+          an organization's network.
+      gateway:
+        type: string
+        pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        description: |
+          Gateway is a router or a proxy server that routes between networks.
+      dns:
+        type: array
+        items:
+          type: string
+          pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        description: |
+          The Domain Name System (DNS) is a hierarchical distributed naming
+          system for computers, services, or any resource connected to the
+          Internet or a private network.
+      currentStatus:
+        type: boolean
+        readOnly: true
+        description: |
+          Current status for the Ethernet interface, 0 for down and 1 for up.
+      restart:
+        type: boolean
+        readOnly: true
+        description: |
+          `1` means that view must be restarted after receiving the response.
+    example:
+          $ref: '#/externalDocs/x-mocks/Ethernet'
+
+externalDocs:
+  url: '#'
+  x-mocks:
+    Ethernet:
+      {
+        "id":1,
+        "wan":true,
+        "name": "eth0",
+        "ip": "192.168.3.127",
+        "mac": "FF:FF:FF:FF:FF:FF",
+        "netmask": "255.255.255.0",
+        "subnet": "192.168.3.0",
+        "gateway": "192.168.3.254",
+        "dns":["8.8.8.8", "8.8.4.4"],
+        "currentStatus":true,
+        "enable":true,
+        "enableDhcp":false
+      }
+    Ethernets:
+      [
+        {
+          "id":1,
+          "wan":true,
+          "name": "eth0",
+          "ip": "192.168.3.127",
+          "mac": "FF:FF:FF:FF:FF:FF",
+          "netmask": "255.255.255.0",
+          "subnet": "192.168.3.0",
+          "gateway": "192.168.3.254",
+          "dns":["8.8.8.8", "8.8.4.4"],
+          "currentStatus":true,
+          "enable":true,
+          "enableDhcp":false
+        },
+        {
+          "id":2,
+          "wan":false,
+          "name": "eth1",
+          "ip": "192.168.100.127",
+          "mac": "FF:FF:FF:FF:FF:FF",
+          "netmask": "255.255.255.0",
+          "subnet": "192.168.100.0",
+          "gateway": "192.168.100.254",
+          "dns":["8.8.8.8", "8.8.4.4"],
+          "currentStatus":true,
+          "enable":true,
+          "enableDhcp":false,
+          "restart":true
+        }
+      ]
