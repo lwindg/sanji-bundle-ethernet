@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Ethernet API
   description: Handle the Ethernet interface(s)
-  version: "0.9.14"
+  version: "0.10.2"
 
 schemes:
   - http
@@ -98,14 +98,14 @@ definitions:
         description: Set interface UP.
       wan:
         type: boolean
-        description: Define the interface type is WAN (`1`) or LAN (`0`)
+        description: Define the interface type is WAN (`true`) or LAN (`false`)
       name:
         type: string
         readOnly: true
         description: Indicate the interface name.
       enableDhcp:
         type: boolean
-        description: Enable (`1`) the dhcp client or using the static IP (`0`).
+        description: Enable (`true`) the dhcp client or using the static IP (`false`).
       ip:
         type: string
         pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
@@ -147,7 +147,7 @@ definitions:
         type: boolean
         readOnly: true
         description: |
-          `1` means that view must be restarted after receiving the response.
+          `true` means that view must be restarted after receiving the response.
     example:
           $ref: '#/externalDocs/x-mocks/Ethernet'
 
