@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Ethernet API
   description: Handle the Ethernet interface(s)
-  version: "0.9.14"
+  version: "0.10.2"
 
 schemes:
   - http
