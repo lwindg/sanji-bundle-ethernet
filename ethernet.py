@@ -358,7 +358,7 @@ class Ethernet(Sanji):
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
-                self.publish.event.put("/network/interface", data=info)
+                self.publish.event.put("/network/interfaces/{}".format(info["name"]), data=info)
             except Exception, e:
                 # error = e.message
                 pass

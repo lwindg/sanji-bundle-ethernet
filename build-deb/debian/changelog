@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.10.3-1) unstable; urgency=low
+
+  * Update interface event schema.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 03 Mar 2016 17:20:58 +0800
+
 sanji-bundle-ethernet (0.10.2-1) unstable; urgency=low
 
   * Change dhcp client setting to non-blocking mode.
