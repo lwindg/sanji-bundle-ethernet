@@ -253,13 +253,6 @@ class Ethernet(Sanji):
         collection = sorted(collection, key=lambda k: k["id"])
         return response(data=collection)
 
-        '''capability function removed
-        capability = []
-        for iface in self.model.db:
-            capability.append(iface["id"])
-        return response(data=capability)
-        '''
-
     @Route(methods="get", resource="/network/ethernets/:id")
     def get_by_id(self, message, response):
         """
@@ -366,12 +359,6 @@ class Ethernet(Sanji):
                 # error = e.message
                 pass
         self.model.backup_db()
-        '''
-        time.sleep(2)
-        if error:
-            return response(code=400, data={"message": error})
-        return response(data=self.model.db)
-        '''
 
     @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
