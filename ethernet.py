@@ -72,7 +72,8 @@ class Ethernet(Sanji):
 
     def run(self):
         for iface in self.model.db:
-            self.publish.event.put("/network/interface", data=iface)
+            self.publish.event.put(
+                "/network/interfaces/{}".format(iface["name"]), data=iface)
 
     def load(self, path, ifaces):
         """
@@ -313,7 +314,8 @@ class Ethernet(Sanji):
 
             self.apply(info)
             self.save()
-            self.publish.event.put("/network/interface", data=info)
+            self.publish.event.put(
+                "/network/interfaces/{}".format(info["name"]), data=info)
 
             if resp["restart"] is False:
                 # time.sleep(2)
@@ -358,7 +360,8 @@ class Ethernet(Sanji):
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
-                self.publish.event.put("/network/interfaces/{}".format(info["name"]), data=info)
+                self.publish.event.put(
+                    "/network/interfaces/{}".format(info["name"]), data=info)
             except Exception, e:
                 # error = e.message
                 pass
