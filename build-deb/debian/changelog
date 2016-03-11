@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.10.5-1) unstable; urgency=low
+
+  * Add `six` in requirements.txt for Travis CI.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 11 Mar 2016 16:35:02 +0800
+
 sanji-bundle-ethernet (0.10.4-1) unstable; urgency=low
 
   * Bugfix: update interface event schema.
