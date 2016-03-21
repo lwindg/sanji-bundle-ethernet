@@ -142,7 +142,7 @@ definitions:
         type: boolean
         readOnly: true
         description: |
-          Current status for the Ethernet interface, 0 for down and 1 for up.
+          Current status for the Ethernet interface, `false` for down and `true` for up.
       restart:
         type: boolean
         readOnly: true

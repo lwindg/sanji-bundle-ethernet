@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (0.10.6-1) unstable; urgency=low
+
+  * Update schema's description (from 1/0 to true/false).
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Mon, 21 Mar 2016 13:26:38 +0800
+
 sanji-bundle-ethernet (0.10.5-1) unstable; urgency=low
 
   * Add `six` in requirements.txt for Travis CI.
