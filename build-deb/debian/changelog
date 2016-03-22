@@ -1,0 +1,49 @@
+sanji-bundle-ethernet (0.9.13-1) unstable; urgency=low
+
+  * Add timeout to `grep` for preventing input without EOF.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 05 Nov 2015 11:20:17 +0800
+
+sanji-bundle-ethernet (0.9.12-1) unstable; urgency=low
+
+  * Bugfix: change default read cause wrong comparison while update IP
+    address
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Mon, 02 Nov 2015 18:24:48 +0800
+
+sanji-bundle-ethernet (0.9.11-1) unstable; urgency=low
+
+  * Change default read behavior.
+
+ -- Zack YL Shih <zackyl.shih@moxa.com>  Wed, 28 Oct 2015 13:46:02 +0800
+
+sanji-bundle-ethernet (0.9.10-1) unstable; urgency=low
+
+  * Add "restart" for PUT response.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 01 Oct 2015 14:48:03 +0800
+
+sanji-bundle-ethernet (0.9.9-1) unstable; urgency=low
+
+  * Don't send event to remote bundle, only support local site currently.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Wed, 09 Sep 2015 16:42:07 +0800
+
+sanji-bundle-ethernet (0.9.8-1) unstable; urgency=low
+
+  * Update building policy for debian package.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 09 Jun 2015 18:22:23 +0800
+
+sanji-bundle-ethernet (0.9.8) unstable; urgency=low
+
+  * Using customized script instead of default script with hook script for
+    dhclient to prevent DNS and default gateway be updated.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 04 Jun 2015 17:50:35 +0800
+
+sanji-bundle-ethernet (0.9.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 02 Dec 2014 17:02:46 +0800

@@ -1,0 +1,13 @@
+[
+	{
+		"wan": 0,
+		"ip": "192.168.3.127",
+		"netmask": "255.255.255.0",
+		"subnet": "192.168.3.0",
+		"gateway": "192.168.3.254",
+		"dns": [],
+		"enable": 1,
+		"enableDefaultGW": 0,
+		"enableDhcp": 0
+	}
+]
