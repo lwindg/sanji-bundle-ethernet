@@ -146,7 +146,7 @@ class TestEthernetClass(unittest.TestCase):
         # TODO: how to determine if setting success
         data = {
             "id": 1,
-            "enable": 0
+            "enable": False
         }
         self.bundle.apply(data)
 
