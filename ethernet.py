@@ -106,7 +106,7 @@ class Ethernet(Sanji):
                 db["subnet"] = "192.168.%d.0" % ip_3
                 db["gateway"] = "192.168.%d.254" % ip_3
 
-                db["currentStatus"] = ifaddr["link"]
+                db["status"] = ifaddr["link"]
                 db["mac"] = ifaddr["mac"]
                 self.model.db.append(db)
             self.save()
@@ -160,7 +160,7 @@ class Ethernet(Sanji):
 
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
-        data["currentStatus"] = ifaddr["link"]
+        data["status"] = ifaddr["link"]
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving

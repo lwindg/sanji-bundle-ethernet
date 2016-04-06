@@ -138,7 +138,7 @@ definitions:
           The Domain Name System (DNS) is a hierarchical distributed naming
           system for computers, services, or any resource connected to the
           Internet or a private network.
-      currentStatus:
+      status:
         type: boolean
         readOnly: true
         description: |
@@ -165,7 +165,7 @@ externalDocs:
         "subnet": "192.168.3.0",
         "gateway": "192.168.3.254",
         "dns":["8.8.8.8", "8.8.4.4"],
-        "currentStatus":true,
+        "status":true,
         "enable":true,
         "enableDhcp":false
       }
@@ -181,7 +181,7 @@ externalDocs:
           "subnet": "192.168.3.0",
           "gateway": "192.168.3.254",
           "dns":["8.8.8.8", "8.8.4.4"],
-          "currentStatus":true,
+          "status":true,
           "enable":true,
           "enableDhcp":false
         },
@@ -195,7 +195,7 @@ externalDocs:
           "subnet": "192.168.100.0",
           "gateway": "192.168.100.254",
           "dns":["8.8.8.8", "8.8.4.4"],
-          "currentStatus":true,
+          "status":true,
           "enable":true,
           "enableDhcp":false,
           "restart":true
