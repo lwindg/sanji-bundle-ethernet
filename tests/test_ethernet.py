@@ -204,7 +204,7 @@ class TestEthernetClass(unittest.TestCase):
         mock_ifaddresses.side_effect = mock_ip_ifaddresses
 
         data = self.bundle.read(1)
-        self.assertEqual(True, data["currentStatus"])
+        self.assertEqual(True, data["status"])
         self.assertEqual("78:ac:c0:c1:a8:fe", data["mac"])
 
     @patch("ethernet.ip.ifaddresses")
@@ -245,7 +245,7 @@ class TestEthernetClass(unittest.TestCase):
         def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, data["id"])
-            self.assertEqual(False, data["currentStatus"])
+            self.assertEqual(False, data["status"])
             self.assertEqual("78:ac:c0:c1:a8:ff", data["mac"])
         message.query["id"] = 2
         self.bundle.get(message=message, response=resp, test=True)
@@ -262,7 +262,7 @@ class TestEthernetClass(unittest.TestCase):
         def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(1, data["id"])
-            self.assertEqual(True, data["currentStatus"])
+            self.assertEqual(True, data["status"])
             self.assertEqual("78:ac:c0:c1:a8:fe", data["mac"])
         message.param["id"] = 1
         self.bundle.get_by_id(message=message, response=resp, test=True)
