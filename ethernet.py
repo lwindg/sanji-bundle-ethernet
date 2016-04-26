@@ -9,7 +9,7 @@ from sanji.core import Route
 from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
-from voluptuous import Optional, Extra, Range, Any
+from voluptuous import Required, Optional, Extra, Range, Any, REMOVE_EXTRA
 import ip.addr as ip
 
 
@@ -193,17 +193,17 @@ class Ethernet(Sanji):
         """
         # TODO: ip validation
         schema = Schema({
-            "id": Range(min=1),
-            "enable": bool,
+            Required("id"): Range(min=1),
+            Required("enable"): bool,
+            Required("enableDhcp"): bool,
             Optional("wan"): bool,
-            Optional("enableDhcp"): bool,
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
             Optional("subnet"): Any(str, unicode),
             Optional("gateway"): Any(str, unicode),
             Optional("dns"): [Any(str, unicode)],
             Extra: object
-        }, required=True)
+        }, extra=REMOVE_EXTRA)
 
         if not hasattr(message, "data"):
             raise KeyError("Invalid input: \"data\" attribute is required.")

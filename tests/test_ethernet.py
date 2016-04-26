@@ -368,8 +368,12 @@ class TestEthernetClass(unittest.TestCase):
         # always true for response reply before apply the settings
         def resp(code=200, data=None):
             self.assertEqual(200, code)
-        message.data.append({"id": 1, "enable": True, "ip": u"192.168.31.36"})
-        message.data.append({"id": 3, "enable": True})
+        message.data.append(
+            {"id": 1,
+             "enable": True,
+             "enableDhcp": False,
+             "ip": u"192.168.31.36"})
+        message.data.append({"id": 3, "enable": True, "enableDhcp": False})
         self.bundle.put(message, response=resp, test=True)
         data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.36", data["ip"])
@@ -427,8 +431,16 @@ class TestEthernetClass(unittest.TestCase):
         def resp(code=200, data=None):
             self.assertEqual(200, code)
             self.assertEqual(2, len(data))
-        message.data.append({"id": 1, "enable": True, "ip": u"192.168.31.37"})
-        message.data.append({"id": 2, "enable": True, "ip": u"192.168.41.37"})
+        message.data.append(
+            {"id": 1,
+             "enable": True,
+             "enableDhcp": False,
+             "ip": u"192.168.31.37"})
+        message.data.append(
+            {"id": 2,
+             "enable": True,
+             "enableDhcp": False,
+             "ip": u"192.168.41.37"})
 
         def mock_event_put(resource, data):
             pass
@@ -472,6 +484,7 @@ class TestEthernetClass(unittest.TestCase):
         message.param["id"] = 1
         message.data["id"] = 1
         message.data["enable"] = True
+        message.data["enableDhcp"] = False
         message.data["ip"] = u"192.168.31.39"
 
         def mock_event_put(resource, data):
@@ -522,6 +535,7 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(404, code)
         message.data["id"] = 3
         message.data["enable"] = False
+        message.data["enableDhcp"] = False
         message.data["ip"] = u"192.168.31.37"
         self.bundle.put_by_id(message, response=resp, test=True)
 
@@ -547,6 +561,7 @@ class TestEthernetClass(unittest.TestCase):
             self.assertEqual(404, code)
         message.data["id"] = 1
         message.data["enable"] = False
+        message.data["enableDhcp"] = False
         message.data["ip"] = u"192.168.31.40"
         self.bundle.put_by_id(message, response=resp, test=True)
         data = self.bundle.read(1, config=True)
