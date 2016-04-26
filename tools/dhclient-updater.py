@@ -9,7 +9,7 @@ import json
 
 
 DHCP_RES = "/network/interface/dhcp"
-IFACE_RES = "/network/interface"
+IFACE_RES = "/network/interfaces"
 
 if __name__ == "__main__":
     try:
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     '''
 
     # send event to views
-    data["resource"] = IFACE_RES
+    data["resource"] = "{}/{}".format(IFACE_RES, data["data"]["name"])
     sh.mosquitto_pub("-t", "/controller", "-m", json.dumps(data, indent=2))
     '''
     subprocess.Popen(

@@ -1,3 +1,14 @@
+sanji-bundle-ethernet (1.0.1) unstable; urgency=low
+
+  * Bugfix: `status` should be boolean.
+  * Set `id`, `enable`, and `enableDhcp` to readonly.
+  * `subnet` should be calculated by ip and netmask.
+  * Bugfix: update interface API changed from `/network/interface` to
+    `/network/interfaces/{name}`.
+  * Update readonly `broadcast` by netmask.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 26 Apr 2016 18:09:13 +0800
+
 sanji-bundle-ethernet (1.0.0) unstable; urgency=low
 
   * Use `status` instead of `currentStatus`.

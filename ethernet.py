@@ -9,7 +9,8 @@ from sanji.core import Route
 from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
-from voluptuous import Optional, Extra, Range, Any
+from voluptuous import Required, Optional, Extra, Range, Any, REMOVE_EXTRA
+import ipcalc
 import ip.addr as ip
 
 
@@ -106,7 +107,7 @@ class Ethernet(Sanji):
                 db["subnet"] = "192.168.%d.0" % ip_3
                 db["gateway"] = "192.168.%d.254" % ip_3
 
-                db["status"] = ifaddr["link"]
+                db["status"] = True if ifaddr["link"] == 1 else False
                 db["mac"] = ifaddr["mac"]
                 self.model.db.append(db)
             self.save()
@@ -160,7 +161,7 @@ class Ethernet(Sanji):
 
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
-        data["status"] = ifaddr["link"]
+        data["status"] = True if ifaddr["link"] == 1 else False
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving
@@ -193,17 +194,16 @@ class Ethernet(Sanji):
         """
         # TODO: ip validation
         schema = Schema({
-            "id": Range(min=1),
-            "enable": bool,
+            Required("id"): Range(min=1),
+            Required("enable"): bool,
+            Required("enableDhcp"): bool,
             Optional("wan"): bool,
-            Optional("enableDhcp"): bool,
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
-            Optional("subnet"): Any(str, unicode),
             Optional("gateway"): Any(str, unicode),
             Optional("dns"): [Any(str, unicode)],
             Extra: object
-        }, required=True)
+        }, extra=REMOVE_EXTRA)
 
         if not hasattr(message, "data"):
             raise KeyError("Invalid input: \"data\" attribute is required.")
@@ -290,6 +290,11 @@ class Ethernet(Sanji):
 
         try:
             info = self.merge_info(message.data)
+            if info["enableDhcp"] is False and \
+                    ("ip" in info and "netmask" in info):
+                net = ipcalc.Network("%s/%s" % (info["ip"], info["netmask"]))
+                info["subnet"] = str(net.network())
+                info["broadcast"] = str(net.broadcast())
             resp = copy.deepcopy(info)
 
             restart = False
@@ -403,7 +408,16 @@ class Ethernet(Sanji):
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
+
         try:
+            net = ipcalc.Network(
+                "%s/%s" % (message.data["ip"], message.data["netmask"]))
+            message.data["broadcast"] = str(net.broadcast())
+        except Exception as e:
+            raise ValueError("Cannot calculate broadcast: {}.".format(e))
+
+        try:
+
             self.merge_info(message.data)
             _logger.debug(self.model.db)
             self.model.save_db()
