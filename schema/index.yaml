@@ -125,6 +125,14 @@ definitions:
         description: |
           A subnet (short for "subnetwork") is an identifiably separate part of
           an organization's network.
+      broadcast:
+        type: string
+        readOnly: true
+        pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        description: |
+          A broadcast address is a logical address at which all devices
+          connected to a multiple-access communications network are enabled
+          to receive datagrams.
       gateway:
         type: string
         pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$

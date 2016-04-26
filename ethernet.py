@@ -294,6 +294,7 @@ class Ethernet(Sanji):
                     ("ip" in info and "netmask" in info):
                 net = ipcalc.Network("%s/%s" % (info["ip"], info["netmask"]))
                 info["subnet"] = str(net.network())
+                info["broadcast"] = str(net.broadcast())
             resp = copy.deepcopy(info)
 
             restart = False
@@ -407,7 +408,16 @@ class Ethernet(Sanji):
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
+
         try:
+            net = ipcalc.Network(
+                "%s/%s" % (message.data["ip"], message.data["netmask"]))
+            message.data["broadcast"] = str(net.broadcast())
+        except Exception as e:
+            raise ValueError("Cannot calculate broadcast: {}.".format(e))
+
+        try:
+
             self.merge_info(message.data)
             _logger.debug(self.model.db)
             self.model.save_db()
