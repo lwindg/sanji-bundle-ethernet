@@ -120,6 +120,7 @@ definitions:
         description: Subnet mask for the Ethernet interface.
       subnet:
         type: string
+        readOnly: true
         pattern: ^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
         description: |
           A subnet (short for "subnetwork") is an identifiably separate part of

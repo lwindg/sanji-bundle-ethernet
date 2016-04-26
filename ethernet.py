@@ -10,6 +10,7 @@ from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
 from voluptuous import Required, Optional, Extra, Range, Any, REMOVE_EXTRA
+import ipcalc
 import ip.addr as ip
 
 
@@ -199,7 +200,6 @@ class Ethernet(Sanji):
             Optional("wan"): bool,
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
-            Optional("subnet"): Any(str, unicode),
             Optional("gateway"): Any(str, unicode),
             Optional("dns"): [Any(str, unicode)],
             Extra: object
@@ -290,6 +290,10 @@ class Ethernet(Sanji):
 
         try:
             info = self.merge_info(message.data)
+            if info["enableDhcp"] is False and \
+                    ("ip" in info and "netmask" in info):
+                net = ipcalc.Network("%s/%s" % (info["ip"], info["netmask"]))
+                info["subnet"] = str(net.network())
             resp = copy.deepcopy(info)
 
             restart = False
