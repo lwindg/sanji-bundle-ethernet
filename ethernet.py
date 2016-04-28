@@ -9,8 +9,8 @@ from sanji.core import Route
 from sanji.connection.mqtt import Mqtt
 from sanji.model_initiator import ModelInitiator
 from voluptuous import Schema
-from voluptuous import Optional, Extra
-from voluptuous import In, Range, Any
+from voluptuous import Required, Optional, Extra, Range, Any, REMOVE_EXTRA
+import ipcalc
 import ip.addr as ip
 
 
@@ -73,7 +73,8 @@ class Ethernet(Sanji):
 
     def run(self):
         for iface in self.model.db:
-            self.publish.event.put("/network/interface", data=iface)
+            self.publish.event.put(
+                "/network/interfaces/{}".format(iface["name"]), data=iface)
 
     def load(self, path, ifaces):
         """
@@ -106,7 +107,7 @@ class Ethernet(Sanji):
                 db["subnet"] = "192.168.%d.0" % ip_3
                 db["gateway"] = "192.168.%d.254" % ip_3
 
-                db["currentStatus"] = ifaddr["link"]
+                db["status"] = True if ifaddr["link"] == 1 else False
                 db["mac"] = ifaddr["mac"]
                 self.model.db.append(db)
             self.save()
@@ -160,7 +161,7 @@ class Ethernet(Sanji):
 
         iface = "eth%d" % (data["id"]-1)
         ifaddr = ip.ifaddresses(iface)
-        data["currentStatus"] = ifaddr["link"]
+        data["status"] = True if ifaddr["link"] == 1 else False
         data["mac"] = ifaddr["mac"]
 
         # """Use configuration data instead of realtime retrieving
@@ -193,17 +194,16 @@ class Ethernet(Sanji):
         """
         # TODO: ip validation
         schema = Schema({
-            "id": Range(min=1),
-            "enable": In(frozenset([0, 1])),
-            Optional("wan"): In(frozenset([0, 1])),
-            Optional("enableDhcp"): In(frozenset([0, 1])),
+            Required("id"): Range(min=1),
+            Required("enable"): bool,
+            Required("enableDhcp"): bool,
+            Optional("wan"): bool,
             Optional("ip"): Any(str, unicode),
             Optional("netmask"): Any(str, unicode),
-            Optional("subnet"): Any(str, unicode),
             Optional("gateway"): Any(str, unicode),
             Optional("dns"): [Any(str, unicode)],
             Extra: object
-        }, required=True)
+        }, extra=REMOVE_EXTRA)
 
         if not hasattr(message, "data"):
             raise KeyError("Invalid input: \"data\" attribute is required.")
@@ -253,13 +253,6 @@ class Ethernet(Sanji):
         collection = sorted(collection, key=lambda k: k["id"])
         return response(data=collection)
 
-        '''capability function removed
-        capability = []
-        for iface in self.model.db:
-            capability.append(iface["id"])
-        return response(data=capability)
-        '''
-
     @Route(methods="get", resource="/network/ethernets/:id")
     def get_by_id(self, message, response):
         """
@@ -297,26 +290,32 @@ class Ethernet(Sanji):
 
         try:
             info = self.merge_info(message.data)
+            if info["enableDhcp"] is False and \
+                    ("ip" in info and "netmask" in info):
+                net = ipcalc.Network("%s/%s" % (info["ip"], info["netmask"]))
+                info["subnet"] = str(net.network())
+                info["broadcast"] = str(net.broadcast())
             resp = copy.deepcopy(info)
 
-            restart = 0
+            restart = False
             if "restart" in info:
                 restart = info["restart"]
 
-            current = self.read(info["id"])
-            if restart == 1 and current["ip"] != info["ip"]:
-                resp["restart"] = 1
+            current = self.read(info["id"], config=False)
+            if restart is True and current["ip"] != info["ip"]:
+                resp["restart"] = True
             else:
-                resp["restart"] = 0
+                resp["restart"] = False
 
-            if 1 == resp["restart"]:
+            if resp["restart"] is True:
                 response(data=resp)
 
             self.apply(info)
             self.save()
-            self.publish.event.put("/network/interface", data=info)
+            self.publish.event.put(
+                "/network/interfaces/{}".format(info["name"]), data=info)
 
-            if 0 == resp["restart"]:
+            if resp["restart"] is False:
                 # time.sleep(2)
                 return response(data=resp)
         except Exception, e:
@@ -359,17 +358,12 @@ class Ethernet(Sanji):
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
-                self.publish.event.put("/network/interface", data=info)
+                self.publish.event.put(
+                    "/network/interfaces/{}".format(info["name"]), data=info)
             except Exception, e:
                 # error = e.message
                 pass
         self.model.backup_db()
-        '''
-        time.sleep(2)
-        if error:
-            return response(code=400, data={"message": error})
-        return response(data=self.model.db)
-        '''
 
     @Route(methods="put", resource="/network/ethernets/:id")
     def put_by_id(self, message, response):
@@ -414,7 +408,16 @@ class Ethernet(Sanji):
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
+
         try:
+            net = ipcalc.Network(
+                "%s/%s" % (message.data["ip"], message.data["netmask"]))
+            message.data["broadcast"] = str(net.broadcast())
+        except Exception as e:
+            raise ValueError("Cannot calculate broadcast: {}.".format(e))
+
+        try:
+
             self.merge_info(message.data)
             _logger.debug(self.model.db)
             self.model.save_db()

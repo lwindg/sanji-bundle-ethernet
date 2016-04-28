@@ -1,3 +1,74 @@
+sanji-bundle-ethernet (1.0.1) unstable; urgency=low
+
+  * Bugfix: `status` should be boolean.
+  * Set `id`, `enable`, and `enableDhcp` to readonly.
+  * `subnet` should be calculated by ip and netmask.
+  * Bugfix: update interface API changed from `/network/interface` to
+    `/network/interfaces/{name}`.
+  * Update readonly `broadcast` by netmask.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 26 Apr 2016 18:09:13 +0800
+
+sanji-bundle-ethernet (1.0.0) unstable; urgency=low
+
+  * Use `status` instead of `currentStatus`.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Wed, 06 Apr 2016 17:01:49 +0800
+
+sanji-bundle-ethernet (0.10.7) unstable; urgency=low
+
+  * Bugfix: wrong factory config.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 01 Apr 2016 11:38:19 +0800
+
+sanji-bundle-ethernet (0.10.6-1) unstable; urgency=low
+
+  * Update schema's description (from 1/0 to true/false).
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Mon, 21 Mar 2016 13:26:38 +0800
+
+sanji-bundle-ethernet (0.10.5-1) unstable; urgency=low
+
+  * Add `six` in requirements.txt for Travis CI.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 11 Mar 2016 16:35:02 +0800
+
+sanji-bundle-ethernet (0.10.4-1) unstable; urgency=low
+
+  * Bugfix: update interface event schema.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 11 Mar 2016 16:25:38 +0800
+
+sanji-bundle-ethernet (0.10.3-1) unstable; urgency=low
+
+  * Update interface event schema.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 03 Mar 2016 17:20:58 +0800
+
+sanji-bundle-ethernet (0.10.2-1) unstable; urgency=low
+
+  * Change dhcp client setting to non-blocking mode.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Wed, 24 Feb 2016 16:33:34 +0800
+sanji-bundle-ethernet (0.10.1-1) unstable; urgency=low
+
+  * Use true/false instead of 1/0.
+  * Add schema file.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 19 Feb 2016 12:34:00 +0800
+sanji-bundle-ethernet (0.9.13-1) unstable; urgency=low
+
+  * Add timeout to `grep` for preventing input without EOF.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Thu, 05 Nov 2015 11:20:17 +0800
+
+sanji-bundle-ethernet (0.9.12-1) unstable; urgency=low
+
+  * Bugfix: change default read cause wrong comparison while update IP
+    address
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Mon, 02 Nov 2015 18:24:48 +0800
+
 sanji-bundle-ethernet (0.9.11-1) unstable; urgency=low
 
   * Change default read behavior.
