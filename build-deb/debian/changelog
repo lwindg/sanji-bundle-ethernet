@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (1.0.2) unstable; urgency=low
+
+  * Bugfix: Use param["id"] instead of data["id"].
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 14 Oct 2016 15:10:25 +0800
+
 sanji-bundle-ethernet (1.0.1) unstable; urgency=low
 
   * Bugfix: `status` should be boolean.
