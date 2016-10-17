@@ -505,7 +505,7 @@ class TestEthernetClass(unittest.TestCase):
             ...
         }
         """
-        message = Message({"query": {}, "param": {}})
+        message = Message({"query": {}, "param": {"id": 1}})
 
         # no data attribute, other case already tested in "test_put()"
         def resp(code=200, data=None):
@@ -525,7 +525,7 @@ class TestEthernetClass(unittest.TestCase):
             ...
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {}})
+        message = Message({"data": {}, "query": {}, "param": {"id": 3}})
 
         def mock_put(resource, data):
             pass
@@ -551,7 +551,7 @@ class TestEthernetClass(unittest.TestCase):
             ...
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {}})
+        message = Message({"data": {}, "query": {}, "param": {"id": 1}})
 
         def mock_put(resource, data):
             pass
