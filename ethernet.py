@@ -239,13 +239,16 @@ class Ethernet(Sanji):
         collection: /network/ethernets
         id: /network/ethernets?id=#
         """
-
-        # TODO: multiple id supported?
-        if "id" in message.query:
-            message.param["id"] = message.query["id"]
-            return self._get_by_id(message=message, response=response)
-
         collection = []
+
+        if "id" in message.query:
+            for id in message.query["id"].split(","):
+                data = self.read(int(id))
+                if data:
+                    collection.append(data)
+            collection = sorted(collection, key=lambda k: k["id"])
+            return response(data=collection)
+
         for iface in self.model.db:
             data = self.read(iface["id"])
             if data:
@@ -375,7 +378,7 @@ class Ethernet(Sanji):
         }
         """
         if hasattr(message, "data"):
-            message.data["id"] = message.param["id"]
+            message.data["id"] = int(message.param["id"])
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
