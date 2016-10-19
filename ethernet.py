@@ -375,7 +375,7 @@ class Ethernet(Sanji):
         }
         """
         if hasattr(message, "data"):
-            message.data["id"] = message.param["id"]
+            message.data["id"] = int(message.param["id"])
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
