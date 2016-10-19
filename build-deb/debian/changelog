@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (1.0.3) unstable; urgency=low
+
+  * Bugfix: id should be integer.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Wed, 19 Oct 2016 13:10:25 +0800
+
 sanji-bundle-ethernet (1.0.2) unstable; urgency=low
 
   * Bugfix: Use param["id"] instead of data["id"].
