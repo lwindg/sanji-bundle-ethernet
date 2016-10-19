@@ -244,10 +244,10 @@ class TestEthernetClass(unittest.TestCase):
         # case: by id
         def resp(code=200, data=None):
             self.assertEqual(200, code)
-            self.assertEqual(2, data["id"])
-            self.assertEqual(False, data["status"])
-            self.assertEqual("78:ac:c0:c1:a8:ff", data["mac"])
-        message.query["id"] = 2
+            self.assertEqual(2, data[0]["id"])
+            self.assertEqual(False, data[0]["status"])
+            self.assertEqual("78:ac:c0:c1:a8:ff", data[0]["mac"])
+        message.query["id"] = "2"
         self.bundle.get(message=message, response=resp, test=True)
 
     @patch("ethernet.ip.ifaddresses")
