@@ -382,22 +382,21 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
-        "name": Any(str, unicode),
-        "ip": Any(str, unicode),
-        "netmask": Any(str, unicode),
+        Optional("name"): Any(str, unicode),
+        Required("ip"): Any(str, unicode),
+        Required("netmask"): Any(str, unicode),
         Optional("subnet"): Any(str, unicode),
-        "gateway": Any(str, unicode),
-        "dns": [Any(str, unicode)],
+        Required("gateway"): Any(str, unicode),
+        Optional("dns"): [Any(str, unicode)],
         Extra: object
-    }, required=True)
+    }, extra=REMOVE_EXTRA)
 
-    @Route(methods="put", resource="/network/interface/dhcp",
+    @Route(methods="put", resource="/network/interfaces/:iface",
            schema=put_dhcp_schema)
     def put_dhcp_info(self, message):
         """
-        /network/interface/dhcp
+        /network/interfaces/:iface
         "data": {
-            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",

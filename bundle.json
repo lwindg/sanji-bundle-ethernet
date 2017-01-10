@@ -24,7 +24,7 @@
     },
     {
       "role": "view",
-      "resource": "/network/interface/dhcp"
+      "resource": "/network/interfaces/:iface"
     },
     {
       "role": "view",
