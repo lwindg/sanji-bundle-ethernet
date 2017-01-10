@@ -20,6 +20,8 @@ if __name__ == "__main__":
         "code": 200,
         "method": "put",
         "data": {
+            "type": "eth",
+            "mode": "dhcp"
         }
     }
 

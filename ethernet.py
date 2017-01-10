@@ -73,6 +73,8 @@ class Ethernet(Sanji):
 
     def run(self):
         for iface in self.model.db:
+            iface["type"] = "eth"
+            iface["mode"] = "dhcp" if iface["enableDhcp"] else "static"
             self.publish.event.put(
                 "/network/interfaces/{}".format(iface["name"]), data=iface)
 
@@ -315,6 +317,8 @@ class Ethernet(Sanji):
 
             self.apply(info)
             self.save()
+            info["type"] = "eth"
+            info["mode"] = "dhcp" if info["enableDhcp"] else "static"
             self.publish.event.put(
                 "/network/interfaces/{}".format(info["name"]), data=info)
 
@@ -361,6 +365,8 @@ class Ethernet(Sanji):
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
+                info["type"] = "eth"
+                info["mode"] = "dhcp" if iface["enableDhcp"] else "static"
                 self.publish.event.put(
                     "/network/interfaces/{}".format(info["name"]), data=info)
             except Exception, e:
@@ -408,7 +414,8 @@ class Ethernet(Sanji):
         if not hasattr(message, "data"):
             raise ValueError("Invalid input.")
 
-        if "name" not in message.data or "eth" not in message.data["name"]:
+        message.data["name"] = message.param["iface"]
+        if message.data["type"] != "eth":
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
