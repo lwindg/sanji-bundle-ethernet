@@ -389,6 +389,7 @@ class Ethernet(Sanji):
 
     put_dhcp_schema = Schema({
         Optional("name"): Any(str, unicode),
+        Optional("type"): Any(str, unicode),
         Required("ip"): Any(str, unicode),
         Required("netmask"): Any(str, unicode),
         Optional("subnet"): Any(str, unicode),
@@ -419,6 +420,7 @@ class Ethernet(Sanji):
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
+        message.pop("type")
 
         try:
             net = ipcalc.Network(
