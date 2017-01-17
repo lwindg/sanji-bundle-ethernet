@@ -1,3 +1,11 @@
+sanji-bundle-ethernet (1.1.0) unstable; urgency=low
+
+  * Fix: Use `/network/interfaces/:iface` instead.
+  * Fix: Use `wwax` to prevent string too long.
+  * Feat: Add `type` and `mode` for event.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 17 Jan 2017 14:10:26 +0800
+
 sanji-bundle-ethernet (1.0.4) unstable; urgency=low
 
   * Bugfix: "id" in query string should be integer and return collection.
