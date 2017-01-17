@@ -420,7 +420,7 @@ class Ethernet(Sanji):
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
-        message.pop("type")
+        message.data.pop("type")
 
         try:
             net = ipcalc.Network(
