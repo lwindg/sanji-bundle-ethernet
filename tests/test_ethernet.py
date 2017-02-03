@@ -569,7 +569,7 @@ class TestEthernetClass(unittest.TestCase):
 
     def test__put_dhcp_info__invalid_json(self):
         """
-        put_dhcp_info (/network/interface/dhcp): invalid json schema
+        put_dhcp_info (/network/interfaces/:iface): invalid json schema
         "data": {
             "name": "",
             "ip": "",
@@ -579,14 +579,14 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"query": {}, "param": {}})
+        message = Message({"query": {}, "param": {"iface": "eth1"}})
 
         with self.assertRaises(ValueError):
             self.bundle.put_dhcp_info(message, test=True)
 
     def test__put_dhcp_info__unknown_iface(self):
         """
-        put_dhcp_info (/network/interface/dhcp): unknown interface
+        put_dhcp_info (/network/interfaces/:iface): unknown interface
         "data": {
             "name": "",
             "ip": "",
@@ -596,8 +596,9 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {}})
+        message = Message({"data": {}, "query": {}, "param": {"iface": "eth2"}})
         message.data["name"] = "eth2"
+        message.data["type"] = "eth"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
@@ -608,7 +609,7 @@ class TestEthernetClass(unittest.TestCase):
     @patch("ethernet.ip.ifaddresses")
     def test__put_dhcp_info(self, mock_ifaddresses):
         """
-        put_dhcp_info (/network/interface/dhcp)
+        put_dhcp_info (/network/interfaces/:iface)
         "data": {
             "name": "",
             "ip": "",
@@ -618,8 +619,9 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {}})
+        message = Message({"data": {}, "query": {}, "param": {"iface": "eth1"}})
         message.data["name"] = "eth1"
+        message.data["type"] = "eth"
         message.data["ip"] = "192.168.41.3"
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
