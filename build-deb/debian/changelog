@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (1.1.1) unstable; urgency=low
+
+  * Fix: Unit tests.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Fri, 03 Feb 2017 11:15:00 +0800
+
 sanji-bundle-ethernet (1.1.0) unstable; urgency=low
 
   * Fix: Use `/network/interfaces/:iface` instead.
