@@ -596,7 +596,8 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {"iface": "eth2"}})
+        message = Message(
+            {"data": {}, "query": {}, "param": {"iface": "eth2"}})
         message.data["name"] = "eth2"
         message.data["type"] = "eth"
         message.data["ip"] = "192.168.41.3"
@@ -619,7 +620,8 @@ class TestEthernetClass(unittest.TestCase):
             "gateway": ""
         }
         """
-        message = Message({"data": {}, "query": {}, "param": {"iface": "eth1"}})
+        message = Message(
+            {"data": {}, "query": {}, "param": {"iface": "eth1"}})
         message.data["name"] = "eth1"
         message.data["type"] = "eth"
         message.data["ip"] = "192.168.41.3"
