@@ -1,6 +1,6 @@
 {
   "name": "ethernet",
-  "version": "1.0.4",
+  "version": "1.1.1",
   "author": "Aeluin Chen",
   "email": "aeluin.chen@moxa.com",
   "description": "Handles the Ethernet interfaces",
@@ -24,7 +24,7 @@
     },
     {
       "role": "view",
-      "resource": "/network/interface/dhcp"
+      "resource": "/network/interfaces/:iface"
     },
     {
       "role": "view",

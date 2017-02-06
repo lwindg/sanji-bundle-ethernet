@@ -122,7 +122,7 @@ def dhclient(iface, enable, script=None):
     try:
         dhclients = sh.awk(
             sh.grep(
-                sh.grep(sh.ps("ax"), iface, _timeout=5),
+                sh.grep(sh.ps("wwax"), iface, _timeout=5),
                 "dhclient", _timeout=5),
             "{print $1}")
         dhclients = dhclients.split()

@@ -73,6 +73,8 @@ class Ethernet(Sanji):
 
     def run(self):
         for iface in self.model.db:
+            iface["type"] = "eth"
+            iface["mode"] = "dhcp" if iface["enableDhcp"] else "static"
             self.publish.event.put(
                 "/network/interfaces/{}".format(iface["name"]), data=iface)
 
@@ -315,6 +317,8 @@ class Ethernet(Sanji):
 
             self.apply(info)
             self.save()
+            info["type"] = "eth"
+            info["mode"] = "dhcp" if info["enableDhcp"] else "static"
             self.publish.event.put(
                 "/network/interfaces/{}".format(info["name"]), data=info)
 
@@ -361,6 +365,8 @@ class Ethernet(Sanji):
                 info = self.merge_info(iface)
                 self.apply(info)
                 self.model.save_db()
+                info["type"] = "eth"
+                info["mode"] = "dhcp" if iface["enableDhcp"] else "static"
                 self.publish.event.put(
                     "/network/interfaces/{}".format(info["name"]), data=info)
             except Exception, e:
@@ -382,22 +388,22 @@ class Ethernet(Sanji):
         return self._put_by_id(message=message, response=response)
 
     put_dhcp_schema = Schema({
-        "name": Any(str, unicode),
-        "ip": Any(str, unicode),
-        "netmask": Any(str, unicode),
+        Optional("name"): Any(str, unicode),
+        Optional("type"): Any(str, unicode),
+        Required("ip"): Any(str, unicode),
+        Required("netmask"): Any(str, unicode),
         Optional("subnet"): Any(str, unicode),
-        "gateway": Any(str, unicode),
-        "dns": [Any(str, unicode)],
+        Required("gateway"): Any(str, unicode),
+        Optional("dns"): [Any(str, unicode)],
         Extra: object
-    }, required=True)
+    }, extra=REMOVE_EXTRA)
 
-    @Route(methods="put", resource="/network/interface/dhcp",
+    @Route(methods="put", resource="/network/interfaces/:iface",
            schema=put_dhcp_schema)
     def put_dhcp_info(self, message):
         """
-        /network/interface/dhcp
+        /network/interfaces/:iface
         "data": {
-            "name": "",
             "ip": "",
             "netmask": "",
             "subnet": "",
@@ -409,10 +415,12 @@ class Ethernet(Sanji):
         if not hasattr(message, "data"):
             raise ValueError("Invalid input.")
 
-        if "name" not in message.data or "eth" not in message.data["name"]:
+        message.data["name"] = message.param["iface"]
+        if message.data["type"] != "eth":
             return
 
         message.data["id"] = int(message.data["name"].replace("eth", "")) + 1
+        message.data.pop("type")
 
         try:
             net = ipcalc.Network(
