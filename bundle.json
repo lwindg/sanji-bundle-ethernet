@@ -29,6 +29,10 @@
     {
       "role": "view",
       "resource": "/system/remote"
+    },
+    {
+      "role": "view",
+      "resource": "/network/ethernets"
     }
   ]
 }

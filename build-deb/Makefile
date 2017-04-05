@@ -20,7 +20,8 @@ FILES = \
 	$(STAGING_DIR)/debian/postinst \
 	$(STAGING_DIR)/debian/README \
 	$(STAGING_DIR)/debian/rules \
-	$(STAGING_DIR)/debian/source/format
+	$(STAGING_DIR)/debian/source/format \
+	$(STAGING_DIR)/debian/install
 
 .PHONY: all build
 

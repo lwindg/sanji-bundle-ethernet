@@ -1,0 +1,16 @@
+#!/bin/sh
+
+UPDATER="@pkgdir@/tools/link-updater.py"
+
+IFACE="$1"
+
+if [ "$2" = "up" ]; then
+	LINK=1
+elif [ "$2" = "down" ]; then
+	LINK=0
+else
+	logger -t "ifplugd" -p syslog.err "$IFACE: unknown link status"
+	exit 1
+fi
+
+python ${UPDATER} -i ${IFACE} --link ${LINK}

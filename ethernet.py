@@ -398,9 +398,27 @@ class Ethernet(Sanji):
         Extra: object
     }, extra=REMOVE_EXTRA)
 
+    @Route(methods="put", resource="/network/ethernets")
+    def event_link_changed(self, message):
+        if "name" not in message.query:
+            return
+
+        for iface in self.model.db:
+            if iface["name"] == message.query["name"]:
+                data = self.read(iface["id"])
+                if data:
+                    data["type"] = "eth"
+                    self.publish.event.put(
+                        "/network/interfaces/{}".format(
+                            message.query["name"]),
+                        data=data)
+                    return
+        else:
+            return
+
     @Route(methods="put", resource="/network/interfaces/:iface",
            schema=put_dhcp_schema)
-    def put_dhcp_info(self, message):
+    def event_dhcp_info(self, message):
         """
         /network/interfaces/:iface
         "data": {
