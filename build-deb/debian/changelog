@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (1.1.4) unstable; urgency=low
+
+  * fix: Missing meta file "install".
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Wed, 05 Apr 2017 23:59:45 +0800
+
 sanji-bundle-ethernet (1.1.3) unstable; urgency=low
 
   * fix: Detect hotplug link status by `ifplugd`.
