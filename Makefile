@@ -7,7 +7,8 @@ DISTDIR = $(PROJECT)-$(VERSION)
 ARCHIVE = $(CURDIR)/$(DISTDIR).tar.gz
 
 SANJI_VER   ?= 1.0
-INSTALL_DIR = $(DESTDIR)/usr/lib/sanji-$(SANJI_VER)/$(NAME)
+PROJECT_DIR = /usr/lib/sanji-$(SANJI_VER)/$(NAME)
+INSTALL_DIR = $(DESTDIR)/$(PROJECT_DIR)
 STAGING_DIR = $(CURDIR)/staging
 PROJECT_STAGING_DIR = $(STAGING_DIR)/$(DISTDIR)
 
@@ -21,11 +22,13 @@ TARGET_FILES = \
 	ip/addr.py \
 	ip/route.py \
 	hooks/dhclient-script \
-	tools/dhclient-updater.py
+	tools/dhclient-updater.py \
+	tools/link-updater.py
 DIST_FILES= \
 	$(TARGET_FILES) \
 	README.md \
 	Makefile \
+	hooks/ifplugd/sanji-bundle-ethernet.in \
 	tests/requirements.txt \
 	tests/test_ethernet.py \
 	tests/data/ethernet.json.factory \
@@ -34,11 +37,21 @@ DIST_FILES= \
 INSTALL_FILES=$(addprefix $(INSTALL_DIR)/,$(TARGET_FILES))
 STAGING_FILES=$(addprefix $(PROJECT_STAGING_DIR)/,$(DIST_FILES))
 
+IN_FILES=$(shell find ./ -name *.in)
+OUT_FILES=$(IN_FILES:.in=)
 
-all:
+replace = sed -e 's|@pkgdir@|$(PROJECT_DIR)|g'
+
+
+all: $(OUT_FILES)
+
+$(OUT_FILES):
+	@$(replace) $@.in >$@
+	@chmod a+x $@
+	@rm $@.in
 
 clean:
-	rm -rf $(DISTDIR)*.tar.gz $(STAGING_DIR)
+	rm -rf $(DISTDIR)*.tar.gz $(STAGING_DIR) $(OUT_FILES)
 	@rm -rf .coverage
 	@find ./ -name *.pyc | xargs rm -rf
 
@@ -60,7 +73,7 @@ $(PROJECT_STAGING_DIR)/%: %
 	@mkdir -p $(dir $@)
 	@cp -a $< $@
 
-install: $(INSTALL_FILES)
+install: $(INSTALL_FILES:.in=)
 
 $(INSTALL_DIR)/%: %
 	@mkdir -p $(dir $@)
@@ -69,4 +82,4 @@ $(INSTALL_DIR)/%: %
 uninstall:
 	-rm $(addprefix $(INSTALL_DIR)/,$(TARGET_FILES))
 
-.PHONY: clean dist pylint test
+.PHONY: all clean install distclean dist pylint test

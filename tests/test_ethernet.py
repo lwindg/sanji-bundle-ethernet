@@ -567,9 +567,9 @@ class TestEthernetClass(unittest.TestCase):
         data = self.bundle.read(1, config=True)
         self.assertEqual("192.168.31.40", data["ip"])
 
-    def test__put_dhcp_info__invalid_json(self):
+    def test__event_dhcp_info__invalid_json(self):
         """
-        put_dhcp_info (/network/interfaces/:iface): invalid json schema
+        event_dhcp_info (/network/interfaces/:iface): invalid json schema
         "data": {
             "name": "",
             "ip": "",
@@ -582,11 +582,11 @@ class TestEthernetClass(unittest.TestCase):
         message = Message({"query": {}, "param": {"iface": "eth1"}})
 
         with self.assertRaises(ValueError):
-            self.bundle.put_dhcp_info(message, test=True)
+            self.bundle.event_dhcp_info(message, test=True)
 
-    def test__put_dhcp_info__unknown_iface(self):
+    def test__event_dhcp_info__unknown_iface(self):
         """
-        put_dhcp_info (/network/interfaces/:iface): unknown interface
+        event_dhcp_info (/network/interfaces/:iface): unknown interface
         "data": {
             "name": "",
             "ip": "",
@@ -605,12 +605,12 @@ class TestEthernetClass(unittest.TestCase):
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
         with self.assertRaises(ValueError):
-            self.bundle.put_dhcp_info(message, test=True)
+            self.bundle.event_dhcp_info(message, test=True)
 
     @patch("ethernet.ip.ifaddresses")
-    def test__put_dhcp_info(self, mock_ifaddresses):
+    def test__event_dhcp_info(self, mock_ifaddresses):
         """
-        put_dhcp_info (/network/interfaces/:iface)
+        event_dhcp_info (/network/interfaces/:iface)
         "data": {
             "name": "",
             "ip": "",
@@ -628,7 +628,7 @@ class TestEthernetClass(unittest.TestCase):
         message.data["netmask"] = "255.255.255.0"
         message.data["gateway"] = "192.168.41.254"
         message.data["dns"] = ["8.8.8.8"]
-        self.bundle.put_dhcp_info(message, test=True)
+        self.bundle.event_dhcp_info(message, test=True)
 
         data = self.bundle.read(2, config=True)
         self.assertEqual("192.168.41.3", data["ip"])
