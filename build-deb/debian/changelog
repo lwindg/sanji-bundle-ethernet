@@ -1,3 +1,9 @@
+sanji-bundle-ethernet (1.1.5) unstable; urgency=low
+
+  * fix: Push event only in static mode.
+
+ -- Aeluin Chen <aeluin.chen@moxa.com>  Tue, 28 Nov 2017 17:03:53 +0800
+
 sanji-bundle-ethernet (1.1.4) unstable; urgency=low
 
   * fix: Missing meta file "install".
