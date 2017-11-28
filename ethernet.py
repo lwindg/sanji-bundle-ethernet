@@ -75,8 +75,9 @@ class Ethernet(Sanji):
         for iface in self.model.db:
             iface["type"] = "eth"
             iface["mode"] = "dhcp" if iface["enableDhcp"] else "static"
-            self.publish.event.put(
-                "/network/interfaces/{}".format(iface["name"]), data=iface)
+            if iface["enableDhcp"] is not True:
+                self.publish.event.put(
+                    "/network/interfaces/{}".format(iface["name"]), data=iface)
 
     def load(self, path, ifaces):
         """
@@ -319,8 +320,9 @@ class Ethernet(Sanji):
             self.save()
             info["type"] = "eth"
             info["mode"] = "dhcp" if info["enableDhcp"] else "static"
-            self.publish.event.put(
-                "/network/interfaces/{}".format(info["name"]), data=info)
+            if info["enableDhcp"] is not True:
+                self.publish.event.put(
+                    "/network/interfaces/{}".format(info["name"]), data=info)
 
             if resp["restart"] is False:
                 # time.sleep(2)
@@ -367,8 +369,10 @@ class Ethernet(Sanji):
                 self.model.save_db()
                 info["type"] = "eth"
                 info["mode"] = "dhcp" if iface["enableDhcp"] else "static"
-                self.publish.event.put(
-                    "/network/interfaces/{}".format(info["name"]), data=info)
+                if iface["enableDhcp"] is not True:
+                    self.publish.event.put(
+                        "/network/interfaces/{}".format(info["name"]),
+                        data=info)
             except Exception, e:
                 # error = e.message
                 pass
